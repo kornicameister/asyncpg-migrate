@@ -1,0 +1,22 @@
+# everlasting tox
+tox==3.11.1
+
+# linters
+flake8==3.7.7
+flake8-import-order==0.18.1
+flake8-bugbear==19.3.0
+flake8-commas==2.0.0
+flake8-bandit==2.1.1
+flake8-quotes==2.0.1
+flake8-print==3.1.0
+flake8-comprehensions==2.1.0
+
+# mypy power
+mypy==0.701; --no-binary -U mypy
+
+# formatting
+yapf==0.27.0
+
+# testing
+pytest==4.6.2
+
