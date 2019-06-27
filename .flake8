@@ -1,0 +1,22 @@
+[flake8]
+statistics = True
+
+select = E,F,W,C,I,B,S,T,Q
+
+import-order-style=appnexus
+application-package-names=asyncpg_migrate
+
+format = pylint
+hang-closing = false
+
+max-line-length = 119
+inline-quotes = single
+
+disable-noqa = True
+exclude =
+    .git,
+    __pycache__,
+    .mypy_cache,
+    .idea,
+    build,
+    dist
