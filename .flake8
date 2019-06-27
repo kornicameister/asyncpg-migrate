@@ -2,7 +2,8 @@
 statistics = True
 show-source = True
 
-select = E,F,W,C,I,B,S,T,Q,flake8-pytest
+select = E,F,W,C,I,B,S,T,Q
+;xa
 ignore = S101
 
 import-order-style=appnexus
