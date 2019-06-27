@@ -1,0 +1,38 @@
+---
+version: 2.1
+jobs:
+  verify:
+    working_directory: ~/app
+    docker:
+      - image: circleci/python:3.7.3
+    steps:
+      - checkout
+      - run:
+          name: Fix permissions
+          command: |
+            sudo chown -R circleci:circleci \
+              /usr/local/bin
+            sudo chown -R circleci:circleci \
+              /usr/local/lib/python3.7/site-packages
+      - run:
+          name: "Install/Upgrade tox & pip"
+          command: |
+            pip install pip tox --upgrade
+      - run:
+          name: Check formatting
+          command: tox -e yapf
+      - run:
+          name: Check mypy
+          command: tox -e mypy
+      - run:
+          name: Check flake
+          command: tox -e flake8
+      - run:
+          name: Unit test
+          command: tox -e test_unit
+
+workflows:
+  version: 2
+  apg-m-verify::
+    jobs:
+      - verify

@@ -13,8 +13,7 @@ with open(str(_ROOT / 'asyncpg_migrate' / '__init__.py')) as f:
             VERSION = version.strip(" \n'\"")
             break
     else:
-        raise RuntimeError(
-            'unable to read the version from asyncpg/__init__.py')
+        raise RuntimeError('unable to read the version from asyncpg/__init__.py')
 
 setuptools.setup(
     name='asyncpg-migrate',
