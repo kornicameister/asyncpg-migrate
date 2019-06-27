@@ -1,1 +1,1 @@
-mypy==0.701; --no-binary -U mypy
+mypy==0.711; --no-binary -U mypy
