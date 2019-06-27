@@ -1,7 +1,9 @@
 [flake8]
 statistics = True
+show-source = True
 
-select = E,F,W,C,I,B,S,T,Q
+select = E,F,W,C,I,B,S,T,Q,flake8-pytest
+ignore = S101
 
 import-order-style=appnexus
 application-package-names=asyncpg_migrate
