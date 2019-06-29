@@ -1,12 +1,12 @@
 import configparser
 import importlib
 import importlib.util
-import os   
+import os
 from pathlib import Path
 import types
 
-from asyncpg_migrate import model
 from asyncpg_migrate import exceptions
+from asyncpg_migrate import model
 
 
 def load_configuration(cwd: Path, filename: str = 'migrations.ini') -> model.Config:

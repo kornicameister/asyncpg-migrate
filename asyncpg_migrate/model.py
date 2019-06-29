@@ -7,8 +7,6 @@ import typing as t
 
 import asyncpg
 
-from asyncpg_migrate import exceptions
-
 Revision = t.NewType('Revision', int)
 Timestamp = t.NewType('Timestamp', dt.datetime)
 MigrationCallable = t.Callable[[asyncpg.Connection],
