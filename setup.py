@@ -1,21 +1,16 @@
 import sys
+
 import setuptools
-import pathlib
 
-if sys.version_info < (3, 5):
-    raise RuntimeError('asyncpg-migrate requires Python 3.5 or greater')
+__author__ = 'Tomasz Trębski'
+__author_email__ = 'kornicameister@gmail.com'
 
-_ROOT = pathlib.Path(__file__).parent
-with open(str(_ROOT / 'asyncpg_migrate' / '__init__.py')) as f:
-    for line in f:
-        if line.startswith('__version__ ='):
-            _, _, version = line.partition('=')
-            VERSION = version.strip(" \n'\"")
-            break
-    else:
-        raise RuntimeError('unable to read the version from asyncpg/__init__.py')
+if sys.version_info < (3, 7):
+    raise RuntimeError('asyncpg-migrate requires Python 3.7  or greater')
 
 setuptools.setup(
     name='asyncpg-migrate',
-    version=VERSION,
+    setup_requires='setupmeta',
+    # setupmeta options
+    versioning='distance',
 )
