@@ -4,4 +4,4 @@ pytest-watch==4.2.0
 pytest-mock==1.10.4
 mock==3.0.5
 
-asynpg==0.18.3
+asyncpg==0.18.3
