@@ -12,7 +12,7 @@ application-package-names=asyncpg_migrate
 format = pylint
 hang-closing = false
 
-max-line-length = 119
+max-line-length = 90
 inline-quotes = single
 
 disable-noqa = True
