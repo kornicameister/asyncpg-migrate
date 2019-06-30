@@ -12,7 +12,7 @@ LOG = logger.configure(extra={'command': 'upgrade'})
 
 
 @LOG.catch
-async def upgrade(
+async def run(
         config: model.Config,
         target_revision: t.Union[str, model.Revision],
 ) -> t.AsyncIterator[int]:
