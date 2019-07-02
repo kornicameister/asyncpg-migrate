@@ -43,13 +43,11 @@ jobs:
   test_integration:
     working_directory: ~/app
     machine: true
+    docker:
+      - image: circleci/python:3.7.3
     steps:
       - checkout
-      - run:
-          name: Install Python
-          command: |
-            sudo apt-get update -yq
-            sudo apt-get install python3.7 python3.7-dev -yq
+      - setup_remote_docker
       - <<: *install_prepare
       - run:
           name: Integration test
