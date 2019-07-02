@@ -1,15 +1,16 @@
 ---
-x-install-tox: &install_tox
+x-prepare: &install_prepare
   run:
     name: "Install/Upgrade tox & pip"
     command: |
-      export PATH="${PATH}:~/local/bin"
+      sudo chown -R circleci:circleci /usr/local/bin
+      sudo chown -R circleci:circleci /usr/local/lib/python3.7/site-packages
       pip install pip tox --upgrade --user
 x-test-steps: &test_steps
   working_directory: ~/app
   steps:
     - checkout
-    - <<: *install_tox
+    - <<: *install_prepare
     - run:
         name: Unit test
         command: tox -e test_unit
@@ -21,7 +22,7 @@ jobs:
       - image: circleci/python:3.7.3
     steps:
       - checkout
-      - <<: *install_tox
+      - <<: *install_prepare
       - run:
           name: Check formatting
           command: tox -e yapf
@@ -46,6 +47,16 @@ jobs:
     <<: *test_steps
     docker:
       - image: circleci/python:3.7.3
+  test_integration:
+    working_directory: ~/app
+    machine: true
+    steps:
+      - checkout
+      - setup_remote_docker
+      - <<: *install_prepare
+      - run:
+          name: Integration test
+          command: tox -e test_integration
 
 workflows:
   version: 2
