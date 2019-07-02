@@ -5,7 +5,7 @@ x-prepare: &install_prepare
     command: |
       sudo chown -R circleci:circleci /usr/local/bin
       sudo chown -R circleci:circleci /usr/local/lib/python3.7/site-packages
-      pip install pip tox --upgrade --user
+      pip install pip tox --upgrade
 x-test-steps: &test_steps
   working_directory: ~/app
   steps:
