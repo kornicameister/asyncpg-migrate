@@ -72,3 +72,8 @@ workflows:
       - test_37:
           requires:
             - verify
+      - test_integration:
+          requires:
+            - test_35
+            - test_36
+            - test_37
