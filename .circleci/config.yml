@@ -46,7 +46,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install python
+          name: Install Python
           command: apt-get install python3.7 python3.7-dev
       - <<: *install_prepare
       - run:
@@ -58,12 +58,8 @@ workflows:
   apg-m-verify::
     jobs:
       - verify
-      - test_36:
-          requires:
-            - verify
-      - test_37:
-          requires:
-            - verify
+      - test_36
+      - test_37
       - test_integration:
           requires:
             - test_36
