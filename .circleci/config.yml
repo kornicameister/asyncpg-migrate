@@ -13,7 +13,7 @@ x-test-steps: &test_steps
     - <<: *install_prepare
     - run:
         name: Unit test
-        command: tox -e test_unit
+        command: tox -v -e test_unit
 version: 2.1
 jobs:
   verify:
@@ -25,16 +25,13 @@ jobs:
       - <<: *install_prepare
       - run:
           name: Check formatting
-          command: tox -e yapf
+          command: tox -v -e yapf
       - run:
           name: Check mypy
-          command: tox -e mypy
+          command: tox -v -e mypy
       - run:
           name: Check flake
-          command: tox -e flake8
-      - run:
-          name: Unit test
-          command: tox -e test_unit
+          command: tox -v -e flake8
   test_35:
     <<: *test_steps
     docker:
@@ -56,7 +53,7 @@ jobs:
       - <<: *install_prepare
       - run:
           name: Integration test
-          command: tox -e test_integration
+          command: tox -v -e test_integration
 
 workflows:
   version: 2
