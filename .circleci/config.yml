@@ -47,7 +47,9 @@ jobs:
       - checkout
       - run:
           name: Install Python
-          command: apt-get install python3.7 python3.7-dev
+          command: |
+            sudo apt-get update -yq
+            sudo apt-get install python3.7 python3.7-dev -yq
       - <<: *install_prepare
       - run:
           name: Integration test
