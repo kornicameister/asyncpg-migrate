@@ -45,6 +45,9 @@ jobs:
     machine: true
     steps:
       - checkout
+      - run:
+          name: Install python
+          command: apt-get install python3.7 python3.7-dev
       - <<: *install_prepare
       - run:
           name: Integration test
