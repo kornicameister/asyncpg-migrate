@@ -32,10 +32,6 @@ jobs:
       - run:
           name: Check flake
           command: tox -v -e flake8
-  test_35:
-    <<: *test_steps
-    docker:
-      - image: circleci/python:3.5.7
   test_36:
     <<: *test_steps
     docker:
@@ -60,9 +56,6 @@ workflows:
   apg-m-verify::
     jobs:
       - verify
-      - test_35:
-          requires:
-            - verify
       - test_36:
           requires:
             - verify
@@ -71,6 +64,5 @@ workflows:
             - verify
       - test_integration:
           requires:
-            - test_35
             - test_36
             - test_37
