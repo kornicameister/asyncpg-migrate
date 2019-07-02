@@ -45,7 +45,6 @@ jobs:
     machine: true
     steps:
       - checkout
-      - setup_remote_docker
       - <<: *install_prepare
       - run:
           name: Integration test
