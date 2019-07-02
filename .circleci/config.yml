@@ -1,4 +1,19 @@
 ---
+x-prepare: &install_prepare
+  run:
+    name: "Install/Upgrade tox & pip"
+    command: |
+      sudo chown -R circleci:circleci /usr/local/bin
+      sudo chown -R circleci:circleci /usr/local/lib/python$(python --version | sed -e 's/Python\s//g' | awk -F'.' '{print $1"."$2}')/site-packages
+      pip install pip tox --upgrade
+x-test-steps: &test_steps
+  working_directory: ~/app
+  steps:
+    - checkout
+    - <<: *install_prepare
+    - run:
+        name: Unit test
+        command: tox -v -e test_unit
 version: 2.1
 jobs:
   verify:
@@ -7,32 +22,44 @@ jobs:
       - image: circleci/python:3.7.3
     steps:
       - checkout
-      - run:
-          name: Fix permissions
-          command: |
-            sudo chown -R circleci:circleci \
-              /usr/local/bin
-            sudo chown -R circleci:circleci \
-              /usr/local/lib/python3.7/site-packages
-      - run:
-          name: "Install/Upgrade tox & pip"
-          command: |
-            pip install pip tox --upgrade
+      - <<: *install_prepare
       - run:
           name: Check formatting
-          command: tox -e yapf
+          command: tox -v -e yapf
       - run:
           name: Check mypy
-          command: tox -e mypy
+          command: tox -v -e mypy
       - run:
           name: Check flake
-          command: tox -e flake8
+          command: tox -v -e flake8
+  test_36:
+    <<: *test_steps
+    docker:
+      - image: circleci/python:3.6.8
+  test_37:
+    <<: *test_steps
+    docker:
+      - image: circleci/python:3.7.3
+  test_integration:
+    working_directory: ~/app
+    docker:
+      - image: circleci/python:3.7.3
+    steps:
+      - setup_remote_docker
+      - checkout
+      - <<: *install_prepare
       - run:
-          name: Unit test
-          command: tox -e test_unit
+          name: Integration test
+          command: tox -v -e test_integration
 
 workflows:
   version: 2
   apg-m-verify::
     jobs:
       - verify
+      - test_36
+      - test_37
+      - test_integration:
+          requires:
+            - test_36
+            - test_37
