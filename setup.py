@@ -1,6 +1,7 @@
-import sys
-import setuptools
 import pathlib
+import sys
+
+import setuptools
 
 if sys.version_info < (3, 5):
     raise RuntimeError('asyncpg-migrate requires Python 3.5 or greater')

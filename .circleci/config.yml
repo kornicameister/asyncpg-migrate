@@ -1,4 +1,17 @@
 ---
+x-install-tox: &install_tox
+  run:
+    name: "Install/Upgrade tox & pip"
+    command: |
+      pip install pip tox --upgrade
+x-test-steps: &test_steps
+  working_directory: ~/app
+  steps:
+    - checkout
+    - <<: *install_tox
+    - run:
+        name: Unit test
+        command: tox -e test_unit
 version: 2.1
 jobs:
   verify:
@@ -7,17 +20,7 @@ jobs:
       - image: circleci/python:3.7.3
     steps:
       - checkout
-      - run:
-          name: Fix permissions
-          command: |
-            sudo chown -R circleci:circleci \
-              /usr/local/bin
-            sudo chown -R circleci:circleci \
-              /usr/local/lib/python3.7/site-packages
-      - run:
-          name: "Install/Upgrade tox & pip"
-          command: |
-            pip install pip tox --upgrade
+      - <<: *install_tox
       - run:
           name: Check formatting
           command: tox -e yapf
@@ -30,9 +33,30 @@ jobs:
       - run:
           name: Unit test
           command: tox -e test_unit
+  test_35:
+    <<: *test_steps
+    docker:
+      - image: circleci/python:3.5.7
+  test_36:
+    <<: *test_steps
+    docker:
+      - image: circleci/python:3.6.8
+  test_37:
+    <<: *test_steps
+    docker:
+      - image: circleci/python:3.7.3
 
 workflows:
   version: 2
   apg-m-verify::
     jobs:
       - verify
+      - test_35:
+          requires:
+            - verify
+      - test_36:
+          requires:
+            - verify
+      - test_37:
+          requires:
+            - verify
