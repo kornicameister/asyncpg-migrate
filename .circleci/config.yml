@@ -3,7 +3,7 @@ x-install-tox: &install_tox
   run:
     name: "Install/Upgrade tox & pip"
     command: |
-      pip install pip tox --upgrade
+      pip install pip tox --upgrade --user
 x-test-steps: &test_steps
   working_directory: ~/app
   steps:
