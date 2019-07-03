@@ -17,7 +17,7 @@ async def test_ensure_migrations_table_create(mocker: ptm.MockFixture) -> None:
 
     config = model.Config(
         script_location=mocker.stub(),
-        database_dsn=f'postgres://{db_user}:{db_password}@localhost:{db_port}/{db_name}',
+        database_dsn=f'postgres://{db_user}:{db_password}@0.0.0.0:{db_port}/{db_name}',
         database_name='asyncpg_migrate',
     )
 
