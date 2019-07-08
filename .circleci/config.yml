@@ -57,14 +57,23 @@ jobs:
           step-name: Build image for intergration tests
           tag: latest
       - run:
-          name: Do test
+          name: Start postgres
           command: |
             docker-compose \
               -f .circleci/docker-compose.yml \
               up \
-              -d
+              -d \
+              --no-deps \
+              postgres
       - run:
-          name: Finish it
+          name: Integration tests
+          command: |
+            docker-compose \
+              -f .circleci/docker-compose.yml \
+              up \
+              tests
+      - run:
+          name: Cleanup
           command: |
             docker-compose \
               -f .circleci/docker-compose.yml \
