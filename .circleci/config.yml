@@ -58,10 +58,11 @@ jobs:
           tag: latest
       - run:
           name: Do test
-          command: docker-compose -f .circleci/docker-compose.yml up -d --exit-code-from test
-      - run:
-          name: Finish this
-          command: docker-compose -f .circleci/docker-compose.yml down
+          command: |
+            docker-compose \
+              -f .circleci/docker-compose.yml \
+              up \
+              --exit-code-from tests
 
 workflows:
   version: 2
