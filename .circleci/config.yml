@@ -49,7 +49,6 @@ jobs:
     machine: true
     steps:
       - checkout
-      - setup_remote_docker
       - docker/install-docker
       - docker/install-docker-compose
       - docker/build:
