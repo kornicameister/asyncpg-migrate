@@ -62,8 +62,7 @@ jobs:
             docker-compose \
               -f .circleci/docker-compose.yml \
               up \
-              -d \
-              --exit-code-from tests
+              -d
       - run:
           name: Finish it
           command: |
