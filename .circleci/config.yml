@@ -51,6 +51,9 @@ jobs:
       - checkout
       - docker/install-docker
       - docker/install-docker-compose
+      - run:
+          name: Export buildkit
+          command: export DOCKER_BUILDKIT=1
       - docker/build:
           dockerfile: .circleci/Dockerfile
           image: asynpg_migrate_integration
