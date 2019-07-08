@@ -32,5 +32,5 @@ COPY tests ./
 RUN wget https://raw.githubusercontent.com/eficode/wait-for/master/wait-for -O ./wait-for && \
         chmod +x ./wait-for
 
-ENTRYPOINT ["./wait-for postgres", "--"]
+ENTRYPOINT ["./wait-for", "${POSTGRESL_HOST}:${POSTGRESL_PORT}", "--"]
 CMD ["pytest", "-lv", "tests/integration"]
