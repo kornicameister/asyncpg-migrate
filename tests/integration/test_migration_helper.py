@@ -10,9 +10,9 @@ from asyncpg_migrate.commands import _helper
 
 @pytest.mark.asyncio
 async def test_ensure_migrations_table_create(mocker: ptm.MockFixture) -> None:
-    db_user = os.getenv('POSTGRES_USERNAME')
+    db_user = os.getenv('POSTGRES_USER')
     db_password = os.getenv('POSTGRES_PASSWORD')
-    db_name = os.getenv('POSTGRES_DATABASE')
+    db_name = os.getenv('POSTGRES_DB')
     db_port = os.getenv('POSTGRES_PORT')
     db_host = os.getenv('POSTGRES_HOST')
 

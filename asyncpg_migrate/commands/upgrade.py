@@ -83,7 +83,7 @@ async def run(
 
                 await migration.upgrade(c)
                 await c.execute(
-                    f'insert into {MIGRATIONS_SCHEMA}.{MIGRATIONS_TABLE}'
+                    f'insert into {constants.MIGRATIONS_SCHEMA}.{constants.MIGRATIONS_TABLE}'
                     f' (revision, label, timestamp, direction)'
                     f' values ($1, $2, $3, $4)',
                     migration.revision,
