@@ -29,4 +29,4 @@ COPY pytest.ini ./
 COPY asyncpg_migrate ./asyncpg_migrate
 COPY tests ./tests
 
-CMD ["python", "-m", "pytest", "-lv", "tests/integration"]
+CMD ["python", "-m", "pytest", "-c",  "pytest.ini", "tests/integration"]
