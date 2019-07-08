@@ -13,7 +13,7 @@ x-test-steps: &test_steps
     - <<: *install_prepare
     - run:
         name: Unit test
-        command: tox -v -e test_unit
+        command: tox -v -e test_ci
 
 orbs:
   docker: circleci/docker@0.5.2
@@ -40,44 +40,20 @@ jobs:
     <<: *test_steps
     docker:
       - image: circleci/python:3.6.8
+      - image: postgres:latest
+        environment:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
   test_37:
     <<: *test_steps
     docker:
       - image: circleci/python:3.7.3
-  test_integration:
-    working_directory: ~/app
-    machine: true
-    steps:
-      - checkout
-      - docker/install-docker
-      - docker/install-docker-compose
-      - docker/build:
-          dockerfile: .circleci/Dockerfile
-          image: asynpg_migrate_integration
-          step-name: Build image for intergration tests
-          tag: latest
-      - run:
-          name: Start postgres
-          command: |
-            docker-compose \
-              -f .circleci/docker-compose.yml \
-              up \
-              -d \
-              --no-deps \
-              postgres
-      - run:
-          name: Integration tests
-          command: |
-            docker-compose \
-              -f .circleci/docker-compose.yml \
-              up \
-              tests
-      - run:
-          name: Cleanup
-          command: |
-            docker-compose \
-              -f .circleci/docker-compose.yml \
-              down
+      - image: postgres:latest
+        environment:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
 
 workflows:
   version: 2
@@ -86,7 +62,3 @@ workflows:
       - verify
       - test_36
       - test_37
-      - test_integration:
-          requires:
-            - test_36
-            - test_37

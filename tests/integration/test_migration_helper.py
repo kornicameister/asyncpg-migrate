@@ -11,23 +11,17 @@ from asyncpg_migrate.commands import _helper
 
 @pytest.fixture(scope='session')
 def db_name() -> str:
-    db_name = os.getenv('POSTGRES_DB')
-    assert db_name, 'db_name not set'
-    return db_name
+    return os.getenv('POSTGRES_DB', 'test')
 
 
 @pytest.fixture(scope='session')
 def db_dsn(db_name: str) -> str:
-    db_user = os.getenv('POSTGRES_USER')
-    db_password = os.getenv('POSTGRES_PASSWORD')
-    db_port = os.getenv('POSTGRES_PORT')
-    db_host = os.getenv('POSTGRES_HOST')
-
-    assert db_user, 'db_user not set'
-    assert db_password, 'db_password not set'
-    assert db_port, 'db_port not set'
-    assert db_host, 'db_host not set'
-
+    db_user = os.getenv('POSTGRES_USER', 'test')
+    db_password = os.getenv('POSTGRES_PASSWORD', 'test')
+    db_port = os.getenv('POSTGRES_PORT', 5432)
+    db_host = os.getenv('POSTGRES_HOST', 'postgres')
+    if bool(os.getenv('CI', False)):
+        db_host = 'localhost'
     return f'postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
 
 
