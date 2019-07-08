@@ -54,9 +54,9 @@ jobs:
       - docker/install-docker
       - docker/install-docker-compose
       - docker/build:
-        dockerfile: .circleci/Dockerfile
-        image: asynpg_migrate_integration
-        step-name: Build image for intergration tests
+          dockerfile: .circleci/Dockerfile
+          image: asynpg_migrate_integration
+          step-name: Build image for intergration tests
       - run:
           name: Do test
           command: docker-compose -f .circleci/docker-compose.yml up -d

@@ -1,4 +1,4 @@
-FROM python:3.7.3-alpine3.10 as base
+FROM python:3.7.3-alpine3.10
 
 WORKDIR /app
 
@@ -29,15 +29,8 @@ COPY pytest.ini ./
 COPY asyncpg_migrate ./
 COPY tests ./
 
-FROM base
+RUN wget https://raw.githubusercontent.com/eficode/wait-for/master/wait-for -O ./wait-for && \
+        chmod +x ./wait-for
 
-RUN apk add --no-cache \
-        tini=0.18.0-r0 \
-        libstdc++=8.3.0-r0
-RUN addgroup -S app && \
-    adduser -S app -G app
-
-USER app:app
-
-ENTRYPOINT ["/sbin/tini", "--"]
+ENTRYPOINT ["./wait-for postgres", "--"]
 CMD ["pytest", "-lv", "tests/integration"]
