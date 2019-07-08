@@ -1,11 +1,14 @@
 import asyncpg
 from loguru import logger
 
-from asyncpg_migrate import constants
 from asyncpg_migrate import model
 
 
-async def migrations_table_create(config: model.Config) -> None:
+async def migrations_table_create(
+        config: model.Config,
+        migration_table_schema: str,
+        migration_table_name: str,
+) -> None:
     # TODO(kornicameister) add passing different names for
     # migrations table schema and table name itself
 
@@ -36,8 +39,8 @@ async def migrations_table_create(config: model.Config) -> None:
             );
             """
         ).format(
-            table_schema=constants.MIGRATIONS_SCHEMA,
-            table_name=constants.MIGRATIONS_TABLE,
+            table_schema=migrations_table_schema,
+            table_name=migrations_table_name,
             migration_up=model.MigrationDir.UP,
             migration_down=model.MigrationDir.DOWN,
         ))
