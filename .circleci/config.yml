@@ -51,9 +51,6 @@ jobs:
       - checkout
       - docker/install-docker
       - docker/install-docker-compose
-      - run:
-          name: Export buildkit
-          command: export DOCKER_BUILDKIT=1
       - docker/build:
           dockerfile: .circleci/Dockerfile
           image: asynpg_migrate_integration
@@ -61,7 +58,7 @@ jobs:
           tag: latest
       - run:
           name: Do test
-          command: docker-compose -f .circleci/docker-compose.yml up -d
+          command: docker-compose -f .circleci/docker-compose.yml up -d --exit-code-from test
       - run:
           name: Finish this
           command: docker-compose -f .circleci/docker-compose.yml down

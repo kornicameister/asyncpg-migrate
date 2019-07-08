@@ -5,11 +5,11 @@ services:
   postgres:
     image: bitnami/postgresql:latest
     restart: always
-    env_file: .env
+    env_file: env
 
   tests:
     image: asynpg_migrate_integration:latest
-    restart: never
-    env_file: .env
+    restart: "no"
+    env_file: env
     depends_on:
       - postgres
