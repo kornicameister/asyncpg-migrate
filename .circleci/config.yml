@@ -46,16 +46,17 @@ jobs:
       - image: circleci/python:3.7.3
   test_integration:
     working_directory: ~/app
-    docker:
-      - image: circleci/python:3.7.3
+    machine: true
     steps:
       - checkout
+      - setup_remote_docker
       - docker/install-docker
       - docker/install-docker-compose
       - docker/build:
           dockerfile: .circleci/Dockerfile
           image: asynpg_migrate_integration
           step-name: Build image for intergration tests
+          tag: latest
       - run:
           name: Do test
           command: docker-compose -f .circleci/docker-compose.yml up -d
