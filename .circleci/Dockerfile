@@ -1,5 +1,8 @@
 FROM python:3.7.3-alpine3.10
 
+WORKDIR /app
+ENV PYTHONPATH /app
+
 ENV POSTGRES_PASSWORD ""
 ENV POSTGRES_USERNAME ""
 ENV POSTGRES_DATABASE ""
@@ -26,4 +29,4 @@ COPY pytest.ini ./
 COPY asyncpg_migrate ./asyncpg_migrate
 COPY tests ./tests
 
-CMD ["pytest", "-lv", "tests/integration"]
+CMD ["sleep", "5", "&&", "python", "-m", "pytest", "-lv", "tests/integration"]
