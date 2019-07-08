@@ -50,7 +50,6 @@ jobs:
       - image: circleci/python:3.7.3
     steps:
       - checkout
-      - docker/check
       - docker/install-docker
       - docker/install-docker-compose
       - docker/build:
