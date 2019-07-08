@@ -1,8 +1,5 @@
 FROM python:3.7.3-alpine3.10
 
-WORKDIR /app
-
-ENV PYTHONPATH=/app
 ENV POSTGRESQL_PASSWORD ""
 ENV POSTGRESQL_USERNAME ""
 ENV POSTGRESQL_DATABASE ""
@@ -29,8 +26,5 @@ COPY pytest.ini ./
 COPY asyncpg_migrate ./
 COPY tests ./
 
-RUN wget https://raw.githubusercontent.com/eficode/wait-for/master/wait-for -O ./wait-for && \
-        chmod +x ./wait-for
-
-ENTRYPOINT ["./wait-for", "${POSTGRESL_HOST}:${POSTGRESL_PORT}", "--"]
+ENTRYPOINT ["python", "-m" ]
 CMD ["pytest", "-lv", "tests/integration"]
