@@ -5,8 +5,10 @@ import typing as t
 import asyncpg
 from loguru import logger
 
+from asyncpg_migrate import constants
 from asyncpg_migrate import loader
 from asyncpg_migrate import model
+from asyncpg_migrate.commands import _helper
 
 LOG = logger.configure(extra={'command': 'upgrade'})
 
@@ -43,7 +45,11 @@ async def run(
         )
         return
 
-    await _create_migrations_table_if_not_exists(ctx)
+    await _helper.migrations_table_create(
+        config=config,
+        migrations_table_schema=constants.MIGRATIONS_SCHEMA,
+        migrations_table_name=constants.MIGRATIONS_TABLE,
+    )
     maybe_db_revision = await _db_revision(ctx)
 
     if maybe_db_revision is None:

@@ -9,9 +9,6 @@ async def migrations_table_create(
         migrations_table_schema: str,
         migrations_table_name: str,
 ) -> None:
-    # TODO(kornicameister) add passing different names for
-    # migrations table schema and table name itself
-
     logger.debug('Creating migrations table, if needed')
 
     c = await asyncpg.connect(dsn=config.database_dsn)
