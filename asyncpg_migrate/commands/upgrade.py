@@ -50,7 +50,11 @@ async def run(
         migrations_table_schema=constants.MIGRATIONS_SCHEMA,
         migrations_table_name=constants.MIGRATIONS_TABLE,
     )
-    maybe_db_revision = await _db_revision(ctx)
+    maybe_db_revision = await _helper.latest_migration_revision(
+        config=config,
+        migrations_table_schema=constants.MIGRATIONS_SCHEMA,
+        migrations_table_name=constants.MIGRATIONS_TABLE,
+    )
 
     if maybe_db_revision is None:
         start_from_db_revision = 1
@@ -83,7 +87,9 @@ async def run(
 
                 await migration.upgrade(c)
                 await c.execute(
-                    f'insert into {constants.MIGRATIONS_SCHEMA}.{constants.MIGRATIONS_TABLE}'
+                    f'insert into '
+                    f'{constants.MIGRATIONS_SCHEMA}.'
+                    f'{constants.MIGRATIONS_TABLE}'
                     f' (revision, label, timestamp, direction)'
                     f' values ($1, $2, $3, $4)',
                     migration.revision,
@@ -96,6 +102,6 @@ async def run(
                 await asyncio.sleep(1)
         except Exception as ex:
             logger.trace('Failed to upgrade...')
-            raise click.ClickException(str(ex))
+            raise RuntimeError(str(ex))
 
     c.terminate()

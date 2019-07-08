@@ -1,7 +1,44 @@
+import typing as t
+
 import asyncpg
 from loguru import logger
 
 from asyncpg_migrate import model
+
+
+@logger.exception
+async def latest_migration_revision(
+        config: model.Config,
+        migrations_table_schema: str,
+        migrations_table_name: str,
+) -> t.Optional[model.Revision]:
+    c = await asyncpg.connect(dsn=config.database_dsn)
+    await c.reload_schema_state()
+
+    table_name_in_db = await c.fetchval(
+        """
+        select to_regclass('{schema}.{table}')
+        """.format(
+            schema=migrations_table_schema,
+            table=migrations_table_name,
+        ),
+    )
+    if table_name_in_db is None:
+        raise RuntimeError(
+            f'{migrations_table_name} table does not exist, '
+            f'run "upgrade" to create migrations first',
+        )
+    else:
+        db_revision = await c.fetchval(
+            f'select revision from '
+            '{migrations_table_schema}.{migrations_table_name} '
+            f'order by timestamp desc limit 1',
+        )
+        if not db_revision:
+            return None
+        return model.Revision(int(db_revision))
+
+    c.terminate()
 
 
 async def migrations_table_create(
@@ -41,3 +78,5 @@ async def migrations_table_create(
             migration_up=model.MigrationDir.UP,
             migration_down=model.MigrationDir.DOWN,
         ))
+
+    c.terminate()
