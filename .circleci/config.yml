@@ -60,6 +60,9 @@ jobs:
       - run:
           name: Do test
           command: docker-compose -f .circleci/docker-compose.yml up -d
+      - run:
+          name: Finish this
+          command: docker-compose -f .circleci/docker-compose.yml down
 
 workflows:
   version: 2
