@@ -23,8 +23,7 @@ RUN pip install --no-cache-dir -r requirements.txt -r test-requirements.txt && \
         rm -rf test-requirements.txt
 
 COPY pytest.ini ./
-COPY asyncpg_migrate ./
-COPY tests ./
+COPY asyncpg_migrate ./asyncpg_migrate
+COPY tests ./tests
 
-ENTRYPOINT ["python", "-m" ]
 CMD ["pytest", "-lv", "tests/integration"]
