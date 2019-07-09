@@ -15,9 +15,6 @@ x-test-steps: &test_steps
         name: Unit test
         command: tox -v -e test_ci
 
-orbs:
-  docker: circleci/docker@0.5.2
-
 version: 2.1
 jobs:
   verify:
