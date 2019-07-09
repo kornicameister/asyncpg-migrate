@@ -3,8 +3,7 @@ statistics = True
 show-source = True
 
 select = E,F,W,C,I,B,S,T,Q
-;xa
-ignore = S101
+ignore = S101,S608
 
 import-order-style=appnexus
 application-package-names=asyncpg_migrate
