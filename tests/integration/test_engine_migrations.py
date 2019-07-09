@@ -78,11 +78,13 @@ async def test_get_revision_migration_table_exists_no_entries(
         table_name=constants.MIGRATIONS_TABLE,
     )
 
-    assert (await migration.latest_revision(
-        config=config,
-        table_schema=constants.MIGRATIONS_SCHEMA,
-        table_name=constants.MIGRATIONS_TABLE,
-    )) is None
+    assert (
+        await migration.latest_revision(
+            config=config,
+            table_schema=constants.MIGRATIONS_SCHEMA,
+            table_name=constants.MIGRATIONS_TABLE,
+        )
+    ) is None
 
 
 @pytest.mark.asyncio
@@ -113,11 +115,13 @@ async def test_get_revision_migration_table_exists_with_entries(
         model.MigrationDir.DOWN,
     )
 
-    assert (await migration.latest_revision(
-        config=config,
-        table_schema=constants.MIGRATIONS_SCHEMA,
-        table_name=constants.MIGRATIONS_TABLE,
-    )) == 10
+    assert (
+        await migration.latest_revision(
+            config=config,
+            table_schema=constants.MIGRATIONS_SCHEMA,
+            table_name=constants.MIGRATIONS_TABLE,
+        )
+    ) == 10
 
 
 @pytest.mark.asyncio
