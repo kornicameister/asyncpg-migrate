@@ -12,7 +12,7 @@ x-test-steps: &test_steps
     - checkout
     - <<: *install_prepare
     - run:
-        name: Unit test
+        name: Mighty test run
         command: tox -v -e test_ci
 
 version: 2.1
