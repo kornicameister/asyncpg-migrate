@@ -12,45 +12,50 @@ x-test-steps: &test_steps
     - checkout
     - <<: *install_prepare
     - run:
-        name: Unit test
-        command: tox -v -e test_ci
+        name: Mighty test run
+        command: tox -e test_ci
+x-docker-env: &postgres_env
+  environment:
+    POSTGRES_USER: test
+    POSTGRES_PASSWORD: test
+    POSTGRES_DB: test
 
 version: 2.1
 jobs:
   verify:
     working_directory: ~/app
     docker:
-      - image: circleci/python:3.7.3
+      - image: circleci/python:3.7.4
     steps:
       - checkout
       - <<: *install_prepare
       - run:
           name: Check formatting
-          command: tox -v -e yapf
+          command: tox -e yapf
       - run:
           name: Check mypy
-          command: tox -v -e mypy
+          command: tox -e mypy
       - run:
           name: Check flake
-          command: tox -v -e flake8
+          command: tox -e flake8
   test_36:
     <<: *test_steps
     docker:
       - image: circleci/python:3.6.8
-      - image: postgres:latest
-        environment:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: test
-  test_37:
+      - image: postgres:alpine
+        <<: *postgres_env
+  test_373:
     <<: *test_steps
     docker:
       - image: circleci/python:3.7.3
-      - image: postgres:latest
-        environment:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: test
+      - image: postgres:alpine
+        <<: *postgres_env
+  test_374:
+    <<: *test_steps
+    docker:
+      - image: circleci/python:3.7.4
+      - image: postgres:alpine
+        <<: *postgres_env
 
 workflows:
   version: 2
@@ -58,4 +63,5 @@ workflows:
     jobs:
       - verify
       - test_36
-      - test_37
+      - test_373
+      - test_374
