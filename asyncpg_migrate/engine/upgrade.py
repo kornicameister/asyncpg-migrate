@@ -1,22 +1,18 @@
 import asyncio
-import datetime as dt
 import typing as t
 
 import asyncpg
 from loguru import logger
 
-from asyncpg_migrate import constants
 from asyncpg_migrate import loader
 from asyncpg_migrate import model
 from asyncpg_migrate.engine import migration
-
-LOG = logger.opt(record=True)
 
 
 async def run(
         config: model.Config,
         target_revision: t.Union[str, int],
-) -> t.AsyncIterator[int]:
+) -> t.Optional[model.Revision]:
     """Executes the UP migration.
 
     Algorithm:
@@ -27,68 +23,71 @@ async def run(
     5. Be happy :)
     """
 
-    logger.info(f'Upgrade to {target_revision}')
+    logger.info(
+        'Upgrade to revision {target_revision} has been triggered',
+        target_revision=target_revision,
+    )
 
-    await migration.create_table(config=config)
+    connection = await asyncpg.connect(dsn=config.database_dsn)
+    await migration.create_table(connection)
 
     migrations = loader.load_migrations(config)
     if not migrations:
-        LOG.info('There are no migrations scripts, skipping...')
-        return
+        logger.info('There are no migrations scripts, skipping')
+        return None
     else:
         to_revision = model.Revision.decode(
             target_revision,
             list(migrations.keys()),
         )
 
-    maybe_db_revision = await migration.latest_revision(config=config)
+    maybe_db_revision = await migration.latest_revision(connection)
 
     if maybe_db_revision is None:
         start_from_db_revision = 1
-        LOG.debug('Looks like we will run migration for first time')
+        logger.debug('Looks like we will run migration for first time')
     elif maybe_db_revision == to_revision:
-        LOG.debug(f'Already at {to_revision} (latest), skipping...')
-        return
+        logger.debug(f'Already at {to_revision} (latest), skipping...')
+        return None
     else:
         start_from_db_revision = maybe_db_revision + 1
         if start_from_db_revision > to_revision:
-            logger.trace(
+            logger.error(
                 f'Current revision is {maybe_db_revision} and you '
-                f'want to migrate to {to_revision}.\n'
+                f'want to migrate to {to_revision}. '
                 f'Cannot go backward when you want me to go UP, sorry :(',
             )
-            return
+            return None
 
     migrations_to_apply = migrations.slice(
         start=start_from_db_revision,
         end=to_revision,
     )
-    logger.trace(f'Applying migrations {sorted(migrations_to_apply.keys())}')
+    logger.debug(f'Applying migrations {sorted(migrations_to_apply.keys())}')
 
-    c = await asyncpg.connect(dsn=config.database_dsn)
-
-    async with c.transaction():
+    last_completed_revision = None
+    async with connection.transaction():
         try:
-            for m in migrations_to_apply.upgrade_iterator():
-                LOG.trace(f'Applying {m.revision}/{m.label}')
+            for mig in migrations_to_apply.upgrade_iterator():
+                logger.debug(f'Applying {mig.revision}/{mig.label}')
 
-                await m.upgrade(c)
-                await c.execute(
-                    f'insert into '
-                    f'{constants.MIGRATIONS_SCHEMA}.'
-                    f'{constants.MIGRATIONS_TABLE}'
-                    f' (revision, label, timestamp, direction)'
-                    f' values ($1, $2, $3, $4)',
-                    m.revision,
-                    m.label,
-                    dt.datetime.today(),
-                    model.MigrationDir.UP,
+                await mig.upgrade(connection)
+                await migration.save(
+                    migration=mig,
+                    direction=model.MigrationDir.UP,
+                    connection=connection,
                 )
 
-                yield 1
                 await asyncio.sleep(1)
+                last_completed_revision = mig.revision
         except Exception as ex:
-            LOG.trace('Failed to upgrade...')
+            logger.trace('Failed to upgrade...')
+            connection.terminate()
             raise RuntimeError(str(ex))
 
-    c.terminate()
+    connection.terminate()
+    logger.info(
+        'Upgraded did manage to finish at {last_completed_revision} revision',
+        last_completed_revision=last_completed_revision,
+    )
+    return last_completed_revision

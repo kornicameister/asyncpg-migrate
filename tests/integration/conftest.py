@@ -27,7 +27,9 @@ def db_dsn(db_name: str) -> str:
 @pytest.mark.asyncio
 @pytest.fixture(scope='function')
 async def db_connection(db_dsn: str) -> asyncpg.Connection:
-    return await asyncpg.connect(dsn=db_dsn)
+    connection = await asyncpg.connect(dsn=db_dsn)
+    yield connection
+    connection.terminate()
 
 
 @pytest.mark.asyncio
@@ -45,8 +47,7 @@ async def clean_db(db_connection: asyncpg.Connection) -> t.AsyncGenerator[None, 
 @pytest.fixture(
     scope='session',
     params=[
-        0,
-        1,
+        2,
         5,
     ],
 )

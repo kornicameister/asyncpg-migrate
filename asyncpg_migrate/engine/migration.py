@@ -1,3 +1,4 @@
+import datetime as dt
 import typing as t
 
 import asyncpg
@@ -16,15 +17,14 @@ class MigrationProcessingError(Exception):
 
 
 async def latest_revision(
-        config: model.Config,
+        connection: asyncpg.Connection,
         table_schema: str = constants.MIGRATIONS_SCHEMA,
         table_name: str = constants.MIGRATIONS_TABLE,
 ) -> t.Optional[model.Revision]:
     try:
-        c = await asyncpg.connect(dsn=config.database_dsn)
-        await c.reload_schema_state()
+        await connection.reload_schema_state()
 
-        table_name_in_db = await c.fetchval(
+        table_name_in_db = await connection.fetchval(
             """
             select to_regclass('{schema}.{table}')
             """.format(
@@ -36,7 +36,7 @@ async def latest_revision(
         if table_name_in_db is None:
             raise MigrationTableMissing(f'{table_name} table does not exist')
         else:
-            val = await c.fetchval(
+            val = await connection.fetchval(
                 """
                     select revision from {table_schema}.{table_name} order
                     by timestamp desc limit 1;
@@ -46,8 +46,6 @@ async def latest_revision(
                 ),
             )
             db_revision = model.Revision(val) if val is not None else None
-
-        c.terminate()
 
         return db_revision
     except MigrationTableMissing:
@@ -59,17 +57,20 @@ async def latest_revision(
 
 
 async def create_table(
-        config: model.Config,
+        connection: asyncpg.Connection,
         table_schema: str = constants.MIGRATIONS_SCHEMA,
         table_name: str = constants.MIGRATIONS_TABLE,
 ) -> None:
-    logger.debug('Creating migrations table, if needed')
+    logger.opt(lazy=True).debug(
+        'Creating migrations table {table_schema}.{table_name}',
+        table_name=lambda: table_name,
+        table_schema=lambda: table_schema,
+    )
 
-    c = await asyncpg.connect(dsn=config.database_dsn)
-    await c.reload_schema_state()
+    await connection.reload_schema_state()
 
-    async with c.transaction():
-        await c.execute((
+    async with connection.transaction():
+        await connection.execute((
             """
             do $$ begin
                 create type {table_schema}.{table_name}_direction as enum (
@@ -96,4 +97,22 @@ async def create_table(
             migration_down=model.MigrationDir.DOWN,
         ))
 
-    c.terminate()
+
+async def save(
+        migration: model.Migration,
+        direction: model.MigrationDir,
+        connection: asyncpg.Connection,
+        table_schema: str = constants.MIGRATIONS_SCHEMA,
+        table_name: str = constants.MIGRATIONS_TABLE,
+) -> None:
+    await connection.execute(
+        f'insert into '
+        f'{table_schema}.'
+        f'{table_name}'
+        f' (revision, label, timestamp, direction)'
+        f' values ($1, $2, $3, $4)',
+        migration.revision,
+        migration.label,
+        dt.datetime.today(),
+        direction,
+    )

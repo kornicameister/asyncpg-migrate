@@ -5,11 +5,19 @@ import os
 from pathlib import Path
 import types
 
+from loguru import logger
+
 from asyncpg_migrate import exceptions
 from asyncpg_migrate import model
 
 
 def load_configuration(cwd: Path, filename: str = 'migrations.ini') -> model.Config:
+    logger.debug(
+        'Loading configuration from {path}/{filename}',
+        path=cwd,
+        filename=filename,
+    )
+
     parser = configparser.ConfigParser(
         defaults=os.environ,
         interpolation=configparser.ExtendedInterpolation(),
@@ -30,6 +38,8 @@ def load_configuration(cwd: Path, filename: str = 'migrations.ini') -> model.Con
 
 
 def load_migrations(config: model.Config) -> model.Migrations:
+    logger.debug('Loading migrations via {config}', config=config)
+
     all_migrations = model.Migrations()
 
     for f in config.script_location.iterdir():

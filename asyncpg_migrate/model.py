@@ -111,5 +111,5 @@ class MigrationHistory(t.Set[MigrationHistoryEntry]):
 @dataclass(frozen=True)
 class Config:
     script_location: Path
-    database_dsn: str
+    database_dsn: str = field(repr=False)
     database_name: str
