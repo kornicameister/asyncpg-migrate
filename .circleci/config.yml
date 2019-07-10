@@ -13,7 +13,8 @@ x-test-steps: &test_steps
     - <<: *install_prepare
     - run:
         name: Unit test
-        command: tox -v -e test_unit
+        command: tox -v -e test_ci
+
 version: 2.1
 jobs:
   verify:
@@ -36,30 +37,25 @@ jobs:
     <<: *test_steps
     docker:
       - image: circleci/python:3.6.8
+      - image: postgres:latest
+        environment:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
   test_37:
     <<: *test_steps
     docker:
       - image: circleci/python:3.7.3
-  test_integration:
-    working_directory: ~/app
-    docker:
-      - image: circleci/python:3.7.3
-    steps:
-      - setup_remote_docker
-      - checkout
-      - <<: *install_prepare
-      - run:
-          name: Integration test
-          command: tox -v -e test_integration
+      - image: postgres:latest
+        environment:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
 
 workflows:
   version: 2
-  apg-m-verify::
+  apg-m-verify:
     jobs:
       - verify
       - test_36
       - test_37
-      - test_integration:
-          requires:
-            - test_36
-            - test_37
