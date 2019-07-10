@@ -47,6 +47,7 @@ async def clean_db(db_connection: asyncpg.Connection) -> t.AsyncGenerator[None, 
 @pytest.fixture(
     scope='session',
     params=[
+        0,
         2,
         5,
     ],
