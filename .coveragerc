@@ -1,2 +1,2 @@
 [run]
-omit = asyncpg_migrate/tests/*
+omit = tests/*

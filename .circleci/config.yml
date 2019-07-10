@@ -18,6 +18,8 @@ x-test-steps: &test_steps
         path: test-reports
     - store_artifacts:
         path: test-reports
+    - store_artifacts:
+        path: htmlcov
 x-docker-env: &postgres_env
   environment:
     POSTGRES_USER: test
