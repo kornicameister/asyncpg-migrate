@@ -44,16 +44,16 @@ def load_migrations(config: model.Config) -> model.Migrations:
 
         # checks
         try:
-            revision = model.Revision(int(revision))
+            revision = model.Revision.decode(
+                revision,
+                list(all_migrations.keys()),
+            )
         except (TypeError, ValueError) as ex:
             raise exceptions.MigrationLoadError(
-                f'Revision {revision} cannot be parsed as integer',
+                f'Value ({revision}, {type(revision)}) '
+                f'cannot be parsed as valid revision',
             ) from ex
         else:
-            if revision <= 0:
-                raise exceptions.MigrationLoadError(
-                    f'{module} revision is invalid, must be positive number',
-                )
             if revision in all_migrations:
                 duplicated_migration = all_migrations[revision]
                 raise exceptions.MigrationLoadError(

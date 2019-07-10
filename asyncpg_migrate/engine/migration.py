@@ -35,17 +35,16 @@ async def latest_revision(
         if table_name_in_db is None:
             raise MigrationTableMissing(f'{table_name} table does not exist')
         else:
-            db_revision = model.Revision(
-                await c.fetchval(
-                    """
+            val = await c.fetchval(
+                """
                     select revision from {table_schema}.{table_name} order
                     by timestamp desc limit 1;
                     """.format(
-                        table_schema=table_schema,
-                        table_name=table_name,
-                    ),
+                    table_schema=table_schema,
+                    table_name=table_name,
                 ),
             )
+            db_revision = model.Revision(val) if val is not None else None
 
         c.terminate()
 

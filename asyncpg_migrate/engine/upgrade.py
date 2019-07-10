@@ -8,15 +8,14 @@ from loguru import logger
 from asyncpg_migrate import constants
 from asyncpg_migrate import loader
 from asyncpg_migrate import model
-from asyncpg_migrate.commands import _helper
+from asyncpg_migrate.engine import migration
 
-LOG = logger.configure(extra={'command': 'upgrade'})
+LOG = logger.opt(record=True)
 
 
-@LOG.catch
 async def run(
         config: model.Config,
-        target_revision: t.Union[str, model.Revision],
+        target_revision: t.Union[str, int],
 ) -> t.AsyncIterator[int]:
     """Executes the UP migration.
 
@@ -29,38 +28,32 @@ async def run(
     """
 
     migrations = loader.load_migrations(config)
-    to_revision = len(migrations) if target_revision == 'HEAD' else int(target_revision)
-
     if not migrations:
-        logger.trace('There are no migrations scripts, skipping...')
-        raise RuntimeError('No migrations to upgrade')
-    elif to_revision == 0:
-        logger.trace('I can not migrate to revision 0, skipping...')
-        raise RuntimeError('Cannot migrate to revision 0')
-    elif to_revision > len(migrations):
-        logger.trace(
-            f'I can not migrate to revision {to_revision} '
-            f'knowing only {len(migrations)} revision(s), '
-            f'skipping...',
-        )
+        LOG.info('There are no migrations scripts, skipping...')
+        yield -1
         return
 
-    await _helper.migrations_table_create(
-        config=config,
-        migrations_table_schema=constants.MIGRATIONS_SCHEMA,
-        migrations_table_name=constants.MIGRATIONS_TABLE,
+    to_revision = model.Revision.decode(
+        target_revision,
+        list(migrations.keys()),
     )
-    maybe_db_revision = await _helper.latest_migration_revision(
+
+    await migration.create_table(
         config=config,
-        migrations_table_schema=constants.MIGRATIONS_SCHEMA,
-        migrations_table_name=constants.MIGRATIONS_TABLE,
+        table_schema=constants.MIGRATIONS_SCHEMA,
+        table_name=constants.MIGRATIONS_TABLE,
+    )
+    maybe_db_revision = await migration.latest_revision(
+        config=config,
+        table_schema=constants.MIGRATIONS_SCHEMA,
+        table_name=constants.MIGRATIONS_TABLE,
     )
 
     if maybe_db_revision is None:
         start_from_db_revision = 1
-        logger.trace('Looks like we will run migration for first time')
+        LOG.debug('Looks like we will run migration for first time')
     elif maybe_db_revision == to_revision:
-        logger.trace(f'Already at {to_revision} (latest), skipping...')
+        LOG.trace(f'Already at {to_revision} (latest), skipping...')
         return
     else:
         start_from_db_revision = maybe_db_revision + 1
@@ -82,18 +75,18 @@ async def run(
 
     async with c.transaction():
         try:
-            for migration in migrations_to_apply.upgrade_iterator():
-                logger.trace(f'Applying {migration.revision}/{migration.label}')
+            for m in migrations_to_apply.upgrade_iterator():
+                LOG.trace(f'Applying {m.revision}/{m.label}')
 
-                await migration.upgrade(c)
+                await m.upgrade(c)
                 await c.execute(
                     f'insert into '
                     f'{constants.MIGRATIONS_SCHEMA}.'
                     f'{constants.MIGRATIONS_TABLE}'
                     f' (revision, label, timestamp, direction)'
                     f' values ($1, $2, $3, $4)',
-                    migration.revision,
-                    migration.label,
+                    m.revision,
+                    m.label,
                     dt.datetime.today(),
                     model.MigrationDir.UP,
                 )
@@ -101,7 +94,7 @@ async def run(
                 yield 1
                 await asyncio.sleep(1)
         except Exception as ex:
-            logger.trace('Failed to upgrade...')
+            LOG.trace('Failed to upgrade...')
             raise RuntimeError(str(ex))
 
     c.terminate()
