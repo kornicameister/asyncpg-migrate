@@ -7,7 +7,6 @@ import typing as t
 
 import asyncpg
 
-Revision = t.NewType('Revision', int)
 Timestamp = t.NewType('Timestamp', dt.datetime)
 MigrationCallable = t.Callable[[asyncpg.Connection],
                                t.Callable[[asyncpg.Connection],
@@ -17,6 +16,38 @@ MigrationCallable = t.Callable[[asyncpg.Connection],
                                                       ],
                                           ],
                                ]
+
+
+class Revision(int):
+    @classmethod
+    def decode(
+            cls,
+            revision: t.Union[str, int],
+            all_revisions: t.Sequence['Revision'],
+    ) -> 'Revision':
+        """Attempts to decode revision from provided string.
+
+        Provided marker may be either:
+        - {HEAD|BASE} - respectively referring to latest migration or the first one
+        """
+        if isinstance(revision, str):
+            if not all_revisions:
+                raise ValueError(
+                    'Cannot get HEAD revision if there are no revisions available',
+                )
+            if revision.lower() == 'head':
+                return Revision(len(all_revisions))
+            elif revision.lower() == 'base':
+                return Revision(1)
+            else:
+                raise ValueError(
+                    f'{revision} must be either "HEAD" '
+                    f'or "BASE" if defined as string',
+                )
+        else:
+            if revision <= 0:
+                raise ValueError(f'{revision} is not non-negative value')
+            return Revision(revision)
 
 
 class MigrationDir(str, enum.Enum):
@@ -80,5 +111,5 @@ class MigrationHistory(t.Set[MigrationHistoryEntry]):
 @dataclass(frozen=True)
 class Config:
     script_location: Path
-    database_dsn: str
+    database_dsn: str = field(repr=False)
     database_name: str

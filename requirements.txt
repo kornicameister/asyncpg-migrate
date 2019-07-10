@@ -1,2 +1,5 @@
 click==7.0
 uvloop==0.12.2
+loguru==0.3.0
+
+dataclasses==0.6 ; python_version < '3.7'

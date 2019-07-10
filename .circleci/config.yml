@@ -1,23 +1,45 @@
 ---
+x-prepare: &install_prepare
+  run:
+    name: "Install/Upgrade tox & pip"
+    command: |
+      sudo chown -R circleci:circleci /usr/local/bin
+      sudo chown -R circleci:circleci /usr/local/lib/python$(python --version | sed -e 's/Python\s//g' | awk -F'.' '{print $1"."$2}')/site-packages
+      pip install pip tox --upgrade
+x-test-steps: &test_steps
+  working_directory: ~/app
+  steps:
+    - checkout
+    - <<: *install_prepare
+    - run:
+        name: Mighty test run
+        command: tox -e test_ci
+    - store_test_results:
+        path: test-reports
+    - store_artifacts:
+        path: test-reports
+    - store_artifacts:
+        path: htmlcov
+    - codecov/upload:
+        file: coverage.xml
+        when: on_success
+x-docker-env: &postgres_env
+  environment:
+    POSTGRES_USER: test
+    POSTGRES_PASSWORD: test
+    POSTGRES_DB: test
+
 version: 2.1
+orbs:
+  codecov: codecov/codecov@1.0.5
 jobs:
   verify:
     working_directory: ~/app
     docker:
-      - image: circleci/python:3.7.3
+      - image: circleci/python:3.7.4
     steps:
       - checkout
-      - run:
-          name: Fix permissions
-          command: |
-            sudo chown -R circleci:circleci \
-              /usr/local/bin
-            sudo chown -R circleci:circleci \
-              /usr/local/lib/python3.7/site-packages
-      - run:
-          name: "Install/Upgrade tox & pip"
-          command: |
-            pip install pip tox --upgrade
+      - <<: *install_prepare
       - run:
           name: Check formatting
           command: tox -e yapf
@@ -27,12 +49,30 @@ jobs:
       - run:
           name: Check flake
           command: tox -e flake8
-      - run:
-          name: Unit test
-          command: tox -e test_unit
+  test_36:
+    <<: *test_steps
+    docker:
+      - image: circleci/python:3.6.8
+      - image: postgres:alpine
+        <<: *postgres_env
+  test_373:
+    <<: *test_steps
+    docker:
+      - image: circleci/python:3.7.3
+      - image: postgres:alpine
+        <<: *postgres_env
+  test_374:
+    <<: *test_steps
+    docker:
+      - image: circleci/python:3.7.4
+      - image: postgres:alpine
+        <<: *postgres_env
 
 workflows:
   version: 2
-  apg-m-verify::
+  apg-m-verify:
     jobs:
       - verify
+      - test_36
+      - test_373
+      - test_374
