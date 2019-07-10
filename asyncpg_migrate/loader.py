@@ -5,11 +5,19 @@ import os
 from pathlib import Path
 import types
 
+from loguru import logger
+
 from asyncpg_migrate import exceptions
 from asyncpg_migrate import model
 
 
 def load_configuration(cwd: Path, filename: str = 'migrations.ini') -> model.Config:
+    logger.debug(
+        'Loading configuration from {path}/{filename}',
+        path=cwd,
+        filename=filename,
+    )
+
     parser = configparser.ConfigParser(
         defaults=os.environ,
         interpolation=configparser.ExtendedInterpolation(),
@@ -30,6 +38,8 @@ def load_configuration(cwd: Path, filename: str = 'migrations.ini') -> model.Con
 
 
 def load_migrations(config: model.Config) -> model.Migrations:
+    logger.debug('Loading migrations via {config}', config=config)
+
     all_migrations = model.Migrations()
 
     for f in config.script_location.iterdir():
@@ -44,16 +54,16 @@ def load_migrations(config: model.Config) -> model.Migrations:
 
         # checks
         try:
-            revision = model.Revision(int(revision))
+            revision = model.Revision.decode(
+                revision,
+                list(all_migrations.keys()),
+            )
         except (TypeError, ValueError) as ex:
             raise exceptions.MigrationLoadError(
-                f'Revision {revision} cannot be parsed as integer',
+                f'Value ({revision}, {type(revision)}) '
+                f'cannot be parsed as valid revision',
             ) from ex
         else:
-            if revision <= 0:
-                raise exceptions.MigrationLoadError(
-                    f'{module} revision is invalid, must be positive number',
-                )
             if revision in all_migrations:
                 duplicated_migration = all_migrations[revision]
                 raise exceptions.MigrationLoadError(

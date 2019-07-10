@@ -1,6 +1,6 @@
 tox==3.13.2
 
--r ./requirements/yapf.txt
--r ./requirements/mypy.txt
--r ./requirements/flake8.txt
--r ./requirements/tests.txt
+-r requirements/yapf.txt
+-r requirements/mypy.txt
+-r requirements/flake8.txt
+-r requirements/tests.txt
