@@ -22,6 +22,7 @@ x-test-steps: &test_steps
         path: htmlcov
     - codecov/upload:
         file: .coverage
+        when: on_success
 x-docker-env: &postgres_env
   environment:
     POSTGRES_USER: test
