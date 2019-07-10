@@ -20,6 +20,8 @@ x-test-steps: &test_steps
         path: test-reports
     - store_artifacts:
         path: htmlcov
+    - codecov/upload:
+        file: .coverage
 x-docker-env: &postgres_env
   environment:
     POSTGRES_USER: test
@@ -27,6 +29,8 @@ x-docker-env: &postgres_env
     POSTGRES_DB: test
 
 version: 2.1
+orbs:
+  codecov: codecov/codecov@1.0.5
 jobs:
   verify:
     working_directory: ~/app
