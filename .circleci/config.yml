@@ -21,7 +21,7 @@ x-test-steps: &test_steps
     - store_artifacts:
         path: htmlcov
     - codecov/upload:
-        file: .coverage
+        file: coverage.xml
         when: on_success
 x-docker-env: &postgres_env
   environment:

@@ -1,2 +1,9 @@
 [run]
-omit = tests/*
+branch = True
+source = asyncpg_migrate
+
+[report]
+omit =
+    tests/*
+    .tox/*
+    setup.py
