@@ -4,6 +4,7 @@ import typing as t
 import asyncpg
 import pytest
 
+from asyncpg_migrate import constants
 from asyncpg_migrate import model
 
 
@@ -32,9 +33,13 @@ async def db_connection(db_dsn: str) -> asyncpg.Connection:
 @pytest.mark.asyncio
 @pytest.fixture(autouse=True)
 async def clean_db(db_connection: asyncpg.Connection) -> t.AsyncGenerator[None, None]:
-    await db_connection.execute('create schema if not exists public')
+    await db_connection.execute(
+        f'create schema if not exists {constants.MIGRATIONS_SCHEMA}',
+    )
     yield
-    await db_connection.execute('drop schema if exists public cascade')
+    await db_connection.execute(
+        f'drop schema if exists {constants.MIGRATIONS_SCHEMA} cascade',
+    )
 
 
 @pytest.fixture(

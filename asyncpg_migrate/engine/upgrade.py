@@ -27,33 +27,27 @@ async def run(
     5. Be happy :)
     """
 
+    logger.info(f'Upgrade to {target_revision}')
+
+    await migration.create_table(config=config)
+
     migrations = loader.load_migrations(config)
     if not migrations:
         LOG.info('There are no migrations scripts, skipping...')
-        yield -1
         return
+    else:
+        to_revision = model.Revision.decode(
+            target_revision,
+            list(migrations.keys()),
+        )
 
-    to_revision = model.Revision.decode(
-        target_revision,
-        list(migrations.keys()),
-    )
-
-    await migration.create_table(
-        config=config,
-        table_schema=constants.MIGRATIONS_SCHEMA,
-        table_name=constants.MIGRATIONS_TABLE,
-    )
-    maybe_db_revision = await migration.latest_revision(
-        config=config,
-        table_schema=constants.MIGRATIONS_SCHEMA,
-        table_name=constants.MIGRATIONS_TABLE,
-    )
+    maybe_db_revision = await migration.latest_revision(config=config)
 
     if maybe_db_revision is None:
         start_from_db_revision = 1
         LOG.debug('Looks like we will run migration for first time')
     elif maybe_db_revision == to_revision:
-        LOG.trace(f'Already at {to_revision} (latest), skipping...')
+        LOG.debug(f'Already at {to_revision} (latest), skipping...')
         return
     else:
         start_from_db_revision = maybe_db_revision + 1

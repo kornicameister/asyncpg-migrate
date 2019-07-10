@@ -3,6 +3,7 @@ import typing as t
 import asyncpg
 from loguru import logger
 
+from asyncpg_migrate import constants
 from asyncpg_migrate import model
 
 
@@ -16,8 +17,8 @@ class MigrationProcessingError(Exception):
 
 async def latest_revision(
         config: model.Config,
-        table_schema: str,
-        table_name: str,
+        table_schema: str = constants.MIGRATIONS_SCHEMA,
+        table_name: str = constants.MIGRATIONS_TABLE,
 ) -> t.Optional[model.Revision]:
     try:
         c = await asyncpg.connect(dsn=config.database_dsn)
@@ -59,8 +60,8 @@ async def latest_revision(
 
 async def create_table(
         config: model.Config,
-        table_schema: str,
-        table_name: str,
+        table_schema: str = constants.MIGRATIONS_SCHEMA,
+        table_name: str = constants.MIGRATIONS_TABLE,
 ) -> None:
     logger.debug('Creating migrations table, if needed')
 
