@@ -34,7 +34,11 @@ async def test_downgrade(
     else:
         finished_revision = None
 
-        await upgrade.run(config, 'HEAD')
+        await upgrade.run(
+            config,
+            'HEAD',
+            db_connection,
+        )
 
         if target_revision == 'head':
             with pytest.raises(ValueError):
@@ -72,7 +76,11 @@ async def test_downgrade_repeat_no_action_taken(
 ) -> None:
     config, migrations_count = migration_config
     if migrations_count:
-        await upgrade.run(config, 'HEAD')
+        await upgrade.run(
+            config,
+            'HEAD',
+            db_connection,
+        )
 
         first_db_revision = await downgrade.run(
             config,
@@ -107,7 +115,11 @@ async def test_downgrade_stepped(
 ) -> None:
     config, migrations_count = migration_config
     if migrations_count:
-        await upgrade.run(config, 'HEAD')
+        await upgrade.run(
+            config,
+            'HEAD',
+            db_connection,
+        )
 
         while migrations_count > 0:
             await downgrade.run(
