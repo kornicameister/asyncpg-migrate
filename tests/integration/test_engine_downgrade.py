@@ -115,7 +115,7 @@ async def test_downgrade_stepped(
                 step_revision,
                 db_connection,
             )
-            migrations_count -= step_revision
+            migrations_count -= 1
 
         assert (await migration.latest_revision(db_connection)) is not None
         assert (await migration.latest_revision(db_connection)) == 0
