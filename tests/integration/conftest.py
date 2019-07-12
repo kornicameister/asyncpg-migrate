@@ -24,7 +24,6 @@ def db_dsn(db_name: str) -> str:
     return f'postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
 
 
-@pytest.mark.asyncio
 @pytest.fixture(scope='function')
 async def db_connection(db_dsn: str) -> asyncpg.Connection:
     connection = await asyncpg.connect(dsn=db_dsn)
@@ -32,7 +31,6 @@ async def db_connection(db_dsn: str) -> asyncpg.Connection:
     connection.terminate()
 
 
-@pytest.mark.asyncio
 @pytest.fixture(autouse=True)
 async def clean_db(db_connection: asyncpg.Connection) -> t.AsyncGenerator[None, None]:
     await db_connection.execute(

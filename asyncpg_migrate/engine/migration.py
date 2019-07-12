@@ -111,7 +111,10 @@ async def save(
         f'{table_name}'
         f' (revision, label, timestamp, direction)'
         f' values ($1, $2, $3, $4)',
-        migration.revision,
+        (
+            migration.revision
+            if direction == model.MigrationDir.UP else migration.revision - 1
+        ),
         migration.label,
         dt.datetime.today(),
         direction,
