@@ -25,12 +25,20 @@ async def test_upgrade(
     config, migrations_count = migration_config
 
     if not migrations_count:
-        finished_revision = await upgrade.run(config, target_revision)
+        finished_revision = await upgrade.run(
+            config,
+            target_revision,
+            db_connection,
+        )
 
         assert finished_revision is None
         assert (await migration.latest_revision(db_connection)) is None
     else:
-        finished_revision = await upgrade.run(config, target_revision)
+        finished_revision = await upgrade.run(
+            config,
+            target_revision,
+            db_connection,
+        )
 
         assert finished_revision is not None
         assert (await migration.latest_revision(db_connection)) is not None
@@ -46,7 +54,11 @@ async def test_upgrade_stepped(
     if migrations_count:
         finished_revision = None
         for rev in range(1, migrations_count + 1):
-            finished_revision = await upgrade.run(config, rev)
+            finished_revision = await upgrade.run(
+                config,
+                rev,
+                db_connection,
+            )
             assert finished_revision is not None
 
         assert finished_revision is not None
@@ -66,10 +78,18 @@ async def test_upgrade_skip_revision_exists(
         if random_revision == 0:
             random_revision = 1
 
-        first_run_rev = await upgrade.run(config, random_revision)
+        first_run_rev = await upgrade.run(
+            config,
+            random_revision,
+            db_connection,
+        )
         assert first_run_rev is not None
 
-        second_run_rev = await upgrade.run(config, random_revision)
+        second_run_rev = await upgrade.run(
+            config,
+            random_revision,
+            db_connection,
+        )
         assert second_run_rev is None
 
         assert (await migration.latest_revision(db_connection)) is not None
@@ -86,10 +106,18 @@ async def test_upgrade_to_lower_revision(
         last_revision = migrations_count
         before_the_last_revision = last_revision - 1
 
-        first_run_rev = await upgrade.run(config, last_revision)
+        first_run_rev = await upgrade.run(
+            config,
+            last_revision,
+            db_connection,
+        )
         assert first_run_rev is not None
 
-        second_run_rev = await upgrade.run(config, before_the_last_revision)
+        second_run_rev = await upgrade.run(
+            config,
+            before_the_last_revision,
+            db_connection,
+        )
         assert second_run_rev is None
 
         assert (await migration.latest_revision(db_connection)) is not None
