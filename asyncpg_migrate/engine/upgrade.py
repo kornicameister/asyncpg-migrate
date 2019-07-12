@@ -12,6 +12,7 @@ from asyncpg_migrate.engine import migration
 async def run(
         config: model.Config,
         target_revision: t.Union[str, int],
+        connection: asyncpg.Connection,
 ) -> t.Optional[model.Revision]:
     """Executes the UP migration.
 
@@ -28,7 +29,6 @@ async def run(
         target_revision=target_revision,
     )
 
-    connection = await asyncpg.connect(dsn=config.database_dsn)
     await migration.create_table(connection)
 
     migrations = loader.load_migrations(config)
@@ -82,10 +82,8 @@ async def run(
                 last_completed_revision = mig.revision
         except Exception as ex:
             logger.trace('Failed to upgrade...')
-            connection.terminate()
             raise RuntimeError(str(ex))
 
-    connection.terminate()
     logger.info(
         'Upgraded did manage to finish at {last_completed_revision} revision',
         last_completed_revision=last_completed_revision,
