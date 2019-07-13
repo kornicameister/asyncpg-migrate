@@ -10,6 +10,22 @@ from asyncpg_migrate.engine import upgrade
 
 
 @pytest.mark.asyncio
+async def test_downgrade_no_revision(
+        migration_config: t.Tuple[model.Config, int],
+        db_connection: asyncpg.Connection,
+) -> None:
+    config, _ = migration_config
+    finished_revision = await downgrade.run(
+        config,
+        'base',
+        db_connection,
+    )
+
+    assert finished_revision is None
+    assert (await migration.latest_revision(db_connection)) is None
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     'target_revision',
     [
