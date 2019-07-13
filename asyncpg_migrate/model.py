@@ -22,32 +22,33 @@ class Revision(int):
     @classmethod
     def decode(
             cls,
-            revision: t.Union[str, int],
-            all_revisions: t.Sequence['Revision'],
+            rev: t.Union[str, int, 'Revision'],
+            all_revisions: t.Sequence['Revision'] = None,
     ) -> 'Revision':
-        """Attempts to decode revision from provided string.
-
-        Provided marker may be either:
-        - {HEAD|BASE} - respectively referring to latest migration or the first one
-        """
-        if isinstance(revision, str):
-            if not all_revisions:
-                raise ValueError(
-                    'Cannot get HEAD revision if there are no revisions available',
-                )
-            if revision.lower() == 'head':
-                return Revision(len(all_revisions))
-            elif revision.lower() == 'base':
-                return Revision(1)
+        if isinstance(rev, Revision):
+            return rev
+        elif isinstance(rev, int):
+            if rev >= 0:
+                return Revision(rev)
             else:
-                raise ValueError(
-                    f'{revision} must be either "HEAD" '
-                    f'or "BASE" if defined as string',
-                )
+                raise ValueError('Decoding from negative value is not possible')
         else:
-            if revision <= 0:
-                raise ValueError(f'{revision} is not non-negative value')
-            return Revision(revision)
+            try:
+                return cls.decode(int(rev))
+            except ValueError:
+                if not all_revisions:
+                    raise ValueError(
+                        'Decoding from "head" or "base" require knowing all revisions',
+                    )
+                if rev.lower() == 'head':
+                    return all_revisions[-1]
+                elif rev.lower() == 'base':
+                    return all_revisions[0]
+                else:
+                    raise ValueError(
+                        f'{rev} is neither "base" nor "head" and'
+                        f' thus cannot be converted from string',
+                    )
 
 
 class MigrationDir(str, enum.Enum):
@@ -79,6 +80,9 @@ class Migrations(t.Dict[Revision, 'Migration']):
 
     def downgrade_iterator(self) -> t.Iterator['Migration']:
         return iter([self[revision] for revision in sorted(self.keys(), reverse=True)])
+
+    def revisions(self) -> t.Sequence[Revision]:
+        return sorted(self.keys())
 
 
 @dataclass(frozen=True)

@@ -17,6 +17,12 @@ from asyncpg_migrate import model
         (1, 1, [1, 2]),
         (2, 2, [1, 2]),
         (-1, ValueError, [1, 2]),
+        (-1, ValueError, []),
+        (0, 0, [1, 2, 3]),
+        (0, 0, []),
+        (model.Revision(1), 1, [1, 2]),
+        ('foo', ValueError, []),
+        ('bar', ValueError, [1, 2]),
     ],
 )
 def test_revision_decoding(

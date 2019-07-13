@@ -56,7 +56,7 @@ def load_migrations(config: model.Config) -> model.Migrations:
         try:
             revision = model.Revision.decode(
                 revision,
-                list(all_migrations.keys()),
+                all_migrations.revisions(),
             )
         except (TypeError, ValueError) as ex:
             raise exceptions.MigrationLoadError(
