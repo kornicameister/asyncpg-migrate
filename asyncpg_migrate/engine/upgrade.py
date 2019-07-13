@@ -35,6 +35,10 @@ async def run(
     if not migrations:
         logger.info('There are no migrations scripts, skipping')
         return None
+    elif str(target_revision).lower() == 'base':
+        # although revision can be decoded from 'base' string
+        # in upgrade only 'head' is supported
+        raise ValueError('Cannot upgrade using "base"')
     else:
         to_revision = model.Revision.decode(
             target_revision,

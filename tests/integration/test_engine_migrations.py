@@ -1,5 +1,3 @@
-import secrets
-
 import asyncpg
 import pytest
 import pytest_mock as ptm
@@ -91,10 +89,7 @@ async def test_get_revision_migration_table_exists_with_entries(
                 upgrade=mocker.stub(),
                 downgrade=mocker.stub(),
             ),
-            direction=secrets.choice([
-                model.MigrationDir.DOWN,
-                model.MigrationDir.UP,
-            ]),
+            direction=model.MigrationDir.UP,
             table_schema=table_schema,
             table_name=table_name,
         )
