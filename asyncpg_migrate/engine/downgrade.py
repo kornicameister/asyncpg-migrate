@@ -91,5 +91,3 @@ async def run(
             except Exception as ex:
                 logger.exception('Failed to downgrade...')
                 raise RuntimeError(str(ex))
-
-        return None
