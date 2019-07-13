@@ -33,6 +33,15 @@ async def test_upgrade(
 
         assert finished_revision is None
         assert (await migration.latest_revision(db_connection)) is None
+    elif target_revision == 'base':
+        with pytest.raises(ValueError):
+            finished_revision = await upgrade.run(
+                config,
+                target_revision,
+                db_connection,
+            )
+        assert finished_revision is None
+        assert (await migration.latest_revision(db_connection)) is None
     else:
         finished_revision = await upgrade.run(
             config,
