@@ -31,7 +31,7 @@ class Revision(int):
             if rev >= 0:
                 return Revision(rev)
             else:
-                raise ValueError('Decoding from nagative value is not possible')
+                raise ValueError('Decoding from negative value is not possible')
         else:
             try:
                 return cls.decode(int(rev))
