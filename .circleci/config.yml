@@ -75,14 +75,8 @@ jobs:
       - checkout
       - <<: *install_prepare
       - run:
-          name: setup.py build
-          command: python setup.py build
-      - run:
           name: setup.py install
           command: python setup.py install
-      - run:
-          name: setup.py build
-          command: python setup.py build
 
 workflows:
   version: 2
