@@ -75,8 +75,14 @@ jobs:
       - checkout
       - <<: *install_prepare
       - run:
+          name: setup.py build
+          command: python setup.py build
+      - run:
           name: setup.py install
           command: python setup.py install
+       - run:
+          name: setup.py build
+          command: python setup.py build
 
 workflows:
   version: 2
@@ -89,6 +95,4 @@ workflows:
       - test_install:
           requires:
             - verify
-            - test_36
-            - test_373
-            - test_374
+            - test_374  # only require latest python check to pass
