@@ -11,7 +11,7 @@ __maintainer__ = __author__
 __url__ = 'https://github.com/kornicameister/asyncpg-migrate'
 
 if sys.version_info < (3, 6):
-    raise RuntimeError('asyncpg-migrate requires Python 3.7  or greater')
+    raise RuntimeError('asyncpg-migrate requires Python 3.6 or greater')
 
 
 def read_requirements(
