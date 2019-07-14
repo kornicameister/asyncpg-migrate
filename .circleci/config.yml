@@ -73,6 +73,12 @@ workflows:
   apg-m-verify:
     jobs:
       - verify
-      - test_36
-      - test_373
-      - test_374
+      - test_36:
+          requires:
+            - verify
+      - test_373:
+          requires:
+            - verify
+      - test_374:
+          requires:
+            - verify
