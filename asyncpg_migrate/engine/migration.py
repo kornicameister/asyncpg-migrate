@@ -2,7 +2,7 @@ import datetime as dt
 import typing as t
 
 import asyncpg
-from asyncpg import exceptions
+import asyncpg.exceptions
 from decorator import decorator
 from loguru import logger
 
@@ -26,7 +26,7 @@ async def error_trap(
 ) -> t.Any:
     try:
         return await func(*args, **kwargs)
-    except exceptions.UndefinedTableError as ex:
+    except asyncpg.exceptions.UndefinedTableError as ex:
         logger.exception('Migration table is gone, you need to run migrations first')
         raise MigrationTableMissing() from ex
     except Exception as ex:
