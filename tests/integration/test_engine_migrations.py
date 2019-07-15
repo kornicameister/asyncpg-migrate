@@ -6,6 +6,7 @@ import pytest_mock as ptm
 
 from asyncpg_migrate import constants
 from asyncpg_migrate import model
+from asyncpg_migrate.engine import downgrade
 from asyncpg_migrate.engine import migration
 from asyncpg_migrate.engine import upgrade
 
@@ -150,7 +151,7 @@ async def test_migration_history_no_revision(db_connection: asyncpg.Connection) 
 
 
 @pytest.mark.asyncio
-async def test_migration_history_full_upgrade(
+async def test_migration_history_up_head(
         migration_config: t.Tuple[model.Config, int],
         db_connection: asyncpg.Connection,
 ) -> None:
@@ -170,3 +171,60 @@ async def test_migration_history_full_upgrade(
         latest_rev = history[-1]
         assert latest_rev.revision == db_rev
         assert latest_rev.direction == model.MigrationDir.UP
+
+
+@pytest.mark.asyncio
+async def test_migration_history_up_head_down_base(
+        migration_config: t.Tuple[model.Config, int],
+        db_connection: asyncpg.Connection,
+) -> None:
+    config, migrations_count = migration_config
+    if migrations_count:
+        await upgrade.run(
+            config,
+            'HEAD',
+            db_connection,
+        )
+        await downgrade.run(
+            config,
+            'BASE',
+            db_connection,
+        )
+
+        history = await migration.list(db_connection)
+        db_rev = await migration.latest_revision(db_connection)
+
+        assert history is not None
+        assert len(history) == 2 * migrations_count
+
+        latest_rev = history[-1]
+        assert latest_rev.revision == db_rev
+        assert latest_rev.direction == model.MigrationDir.DOWN
+
+
+@pytest.mark.asyncio
+async def test_migration_history_up_head_down_1(
+        migration_config: t.Tuple[model.Config, int],
+        db_connection: asyncpg.Connection,
+) -> None:
+    config, migrations_count = migration_config
+    if migrations_count:
+        await upgrade.run(
+            config,
+            'HEAD',
+            db_connection,
+        )
+        await downgrade.run(
+            config,
+            -1,
+            db_connection,
+        )
+        history = await migration.list(db_connection)
+        db_rev = await migration.latest_revision(db_connection)
+
+        assert history is not None
+        assert len(history) == migrations_count + 1
+
+        latest_rev = history[-1]
+        assert latest_rev.revision == db_rev
+        assert latest_rev.direction == model.MigrationDir.DOWN
