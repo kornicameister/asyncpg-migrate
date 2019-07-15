@@ -67,6 +67,16 @@ jobs:
       - image: circleci/python:3.7.4
       - image: postgres:alpine
         <<: *postgres_env
+  test_install:
+    docker:
+      - image: circleci/python:3.7.4
+    working_directory: ~/app
+    steps:
+      - checkout
+      - <<: *install_prepare
+      - run:
+          name: setup.py install
+          command: python setup.py install
 
 workflows:
   version: 2
@@ -82,3 +92,7 @@ workflows:
       - test_374:
           requires:
             - verify
+      - test_install:
+          requires:
+            - verify
+            - test_374  # only require latest python check to pass
