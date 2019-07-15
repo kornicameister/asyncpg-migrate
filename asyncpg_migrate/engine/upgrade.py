@@ -40,10 +40,12 @@ async def run(
         # in upgrade only 'head' is supported
         raise ValueError('Cannot upgrade using "base"')
     else:
+        logger.debug('Loaded {count} migrations scripts', count=len(migrations))
         to_revision = model.Revision.decode(
             target_revision,
-            list(migrations.keys()),
+            migrations.revisions(),
         )
+        logger.debug('Decoded target revision is {rev}', rev=to_revision)
 
     maybe_db_revision = await migration.latest_revision(connection)
 
@@ -67,7 +69,7 @@ async def run(
         start=start_from_db_revision,
         end=to_revision,
     )
-    logger.debug(f'Applying migrations {sorted(migrations_to_apply.keys())}')
+    logger.debug(f'Applying migrations {migrations_to_apply.revisions()}')
 
     last_completed_revision = None
     async with connection.transaction():

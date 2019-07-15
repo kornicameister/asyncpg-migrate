@@ -2,6 +2,8 @@ import datetime as dt
 import typing as t
 
 import asyncpg
+from asyncpg import exceptions
+from decorator import decorator
 from loguru import logger
 
 from asyncpg_migrate import constants
@@ -16,44 +18,39 @@ class MigrationProcessingError(Exception):
     ...
 
 
+@decorator
+async def error_trap(
+        func: t.Callable[..., t.Awaitable[t.Any]],
+        *args: t.Any,
+        **kwargs: t.Any,
+) -> t.Any:
+    try:
+        return await func(*args, **kwargs)
+    except exceptions.UndefinedTableError as ex:
+        logger.exception('Migration table is gone, you need to run migrations first')
+        raise MigrationTableMissing() from ex
+    except Exception as ex:
+        logger.exception('Unknown error occurred')
+        raise MigrationProcessingError() from ex
+
+
+@error_trap
 async def latest_revision(
         connection: asyncpg.Connection,
         table_schema: str = constants.MIGRATIONS_SCHEMA,
         table_name: str = constants.MIGRATIONS_TABLE,
 ) -> t.Optional[model.Revision]:
-    try:
-        await connection.reload_schema_state()
-
-        table_name_in_db = await connection.fetchval(
-            """
-            select to_regclass('{schema}.{table}')
-            """.format(
-                schema=table_schema,
-                table=table_name,
-            ),
-        )
-        db_revision = None
-        if table_name_in_db is None:
-            raise MigrationTableMissing(f'{table_name} table does not exist')
-        else:
-            val = await connection.fetchval(
-                """
-                    select revision from {table_schema}.{table_name} order
-                    by timestamp desc limit 1;
-                    """.format(
-                    table_schema=table_schema,
-                    table_name=table_name,
-                ),
-            )
-            db_revision = model.Revision(val) if val is not None else None
-
-        return db_revision
-    except MigrationTableMissing:
-        logger.exception('Migration table seems to be missing')
-        raise
-    except Exception as ex:
-        logger.exception('Unknown error occurred while getting latest revision')
-        raise MigrationProcessingError() from ex
+    await connection.reload_schema_state()
+    val = await connection.fetchval(
+        """
+            select revision from {table_schema}.{table_name} order
+            by timestamp desc limit 1;
+        """.format(
+            table_schema=table_schema,
+            table_name=table_name,
+        ),
+    )
+    return model.Revision(val) if val is not None else None
 
 
 async def create_table(
@@ -98,6 +95,7 @@ async def create_table(
         ))
 
 
+@error_trap
 async def save(
         migration: model.Migration,
         direction: model.MigrationDir,
@@ -119,3 +117,35 @@ async def save(
         dt.datetime.today(),
         direction,
     )
+
+
+@error_trap
+async def list(
+        connection: asyncpg.Connection,
+        table_schema: str = constants.MIGRATIONS_SCHEMA,
+        table_name: str = constants.MIGRATIONS_TABLE,
+) -> model.MigrationHistory:
+    logger.debug('Getting a history of migrations')
+
+    history = model.MigrationHistory()
+
+    await connection.reload_schema_state()
+    async with connection.transaction():
+        async for record in connection.cursor("""
+                select revision, label, timestamp, direction from
+                    {table_schema}.{table_name}
+                    order by timestamp asc;
+                """.format(
+                table_schema=table_schema,
+                table_name=table_name,
+        )):
+            history.append(
+                model.MigrationHistoryEntry(
+                    revision=model.Revision(record['revision']),
+                    label=record['label'],
+                    timestamp=record['timestamp'],
+                    direction=model.MigrationDir(record['direction']),
+                ),
+            )
+
+    return history

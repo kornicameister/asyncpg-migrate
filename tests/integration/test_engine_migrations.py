@@ -1,3 +1,5 @@
+import typing as t
+
 import asyncpg
 import pytest
 import pytest_mock as ptm
@@ -5,6 +7,7 @@ import pytest_mock as ptm
 from asyncpg_migrate import constants
 from asyncpg_migrate import model
 from asyncpg_migrate.engine import migration
+from asyncpg_migrate.engine import upgrade
 
 
 @pytest.mark.asyncio
@@ -132,3 +135,38 @@ async def test_ensure_create_table(
         ),
     )
     assert table_name_in_db == table_name
+
+
+@pytest.mark.asyncio
+async def test_migration_history_no_table(db_connection: asyncpg.Connection) -> None:
+    with pytest.raises(migration.MigrationTableMissing):
+        await migration.list(db_connection)
+
+
+@pytest.mark.asyncio
+async def test_migration_history_no_revision(db_connection: asyncpg.Connection) -> None:
+    await migration.create_table(db_connection)
+    assert not (await migration.list(db_connection))
+
+
+@pytest.mark.asyncio
+async def test_migration_history_full_upgrade(
+        migration_config: t.Tuple[model.Config, int],
+        db_connection: asyncpg.Connection,
+) -> None:
+    config, migrations_count = migration_config
+    if migrations_count:
+        await upgrade.run(
+            config,
+            'HEAD',
+            db_connection,
+        )
+        history = await migration.list(db_connection)
+        db_rev = await migration.latest_revision(db_connection)
+
+        assert history is not None
+        assert len(history) == migrations_count
+
+        latest_rev = history[-1]
+        assert latest_rev.revision == db_rev
+        assert latest_rev.direction == model.MigrationDir.UP

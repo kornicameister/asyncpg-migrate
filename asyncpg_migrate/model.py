@@ -76,10 +76,10 @@ class Migrations(t.Dict[Revision, 'Migration']):
             return new_migrations
 
     def upgrade_iterator(self) -> t.Iterator['Migration']:
-        return iter([self[revision] for revision in sorted(self.keys())])
+        return iter([self[rev] for rev in sorted(self)])
 
     def downgrade_iterator(self) -> t.Iterator['Migration']:
-        return iter([self[revision] for revision in sorted(self.keys(), reverse=True)])
+        return iter([self[rev] for rev in sorted(self, reverse=True)])
 
     def revisions(self) -> t.Sequence[Revision]:
         return sorted(self.keys())
@@ -108,7 +108,7 @@ class MigrationHistoryEntry:
     label: str = field(hash=False, compare=False)
 
 
-class MigrationHistory(t.Set[MigrationHistoryEntry]):
+class MigrationHistory(t.List[MigrationHistoryEntry]):
     ...
 
 
