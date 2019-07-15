@@ -29,7 +29,7 @@ def test_db_help(cli_runner: testing.CliRunner) -> None:
         ['test'],
     ],
 )
-def test_db_debug_flag(
+def test_db_quiet_verbose(
         cli_runner: testing.CliRunner,
         mocker: ptm.MockFixture,
         invoke_arg: t.List[str],
