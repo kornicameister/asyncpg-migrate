@@ -11,10 +11,9 @@ from asyncpg_migrate import exceptions
 from asyncpg_migrate import model
 
 
-def load_configuration(cwd: Path, filename: str = 'migrations.ini') -> model.Config:
+def load_configuration(filename: Path) -> model.Config:
     logger.debug(
-        'Loading configuration from {path}/{filename}',
-        path=cwd,
+        'Loading configuration from {filename}',
         filename=filename,
     )
 
@@ -22,7 +21,7 @@ def load_configuration(cwd: Path, filename: str = 'migrations.ini') -> model.Con
         defaults=os.environ,
         interpolation=configparser.ExtendedInterpolation(),
     )
-    parser.read(cwd / filename)
+    parser.read(filename)
 
     user = parser.get('migrations', 'db_user')
     password = parser.get('migrations', 'db_password')
@@ -30,8 +29,12 @@ def load_configuration(cwd: Path, filename: str = 'migrations.ini') -> model.Con
     port = parser.getint('migrations', 'db_port')
     database_name = parser.get('migrations', 'db_name')
 
+    script_location = Path(parser.get('migrations', 'script_location'))
+    if not script_location.is_absolute():
+        script_location = Path.cwd() / script_location
+
     return model.Config(
-        script_location=cwd / parser.get('migrations', 'script_location'),
+        script_location=script_location,
         database_dsn=f'postgres://{user}:{password}@{host}:{port}/{database_name}',
         database_name=database_name,
     )
