@@ -113,7 +113,7 @@ def test_db_upgrade(
 
     from asyncpg_migrate import main
 
-    result = cli_runner.invoke(main.upgrade_cmd, revision)
+    result = cli_runner.invoke(main.db, f'upgrade {revision}')
 
     assert result.exit_code == 0
     connect_patch.assert_called_once_with(database_dsn)
