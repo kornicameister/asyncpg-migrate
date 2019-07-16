@@ -1,3 +1,4 @@
+import collections
 import typing as t
 
 import click
@@ -24,8 +25,10 @@ def test_db_help(cli_runner: testing.CliRunner) -> None:
 @pytest.mark.parametrize(
     'invoke_arg',
     [
+        ['-v', 'test'],
+        ['-vv', 'test'],
+        ['-vvv', 'test'],
         ['--verbose', 'test'],
-        ['--quiet', 'test'],
         ['test'],
     ],
 )
@@ -37,6 +40,7 @@ def test_db_quiet_verbose(
     from loguru import logger
     enable_spy = mocker.spy(logger, name='enable')
     disable_spy = mocker.spy(logger, name='disable')
+    add_spy = mocker.spy(logger, name='add')
 
     from asyncpg_migrate import main
 
@@ -47,12 +51,31 @@ def test_db_quiet_verbose(
     result = cli_runner.invoke(main.db, invoke_arg)
     assert result.exit_code == 0
 
-    if invoke_arg and '--verbose' in invoke_arg:
+    if invoke_arg[0] == '-v' or invoke_arg[0] == '--verbose':
         assert enable_spy.called
         assert not disable_spy.called
-    elif invoke_arg and '--quiet' in invoke_arg:
-        assert not enable_spy.called
-        assert disable_spy.called
+        assert add_spy.mock_calls[0].kwargs == {
+            'format': '{time} {message}',
+            'filter': 'asyncpg-migrate',
+            'level': 'INFO',
+        }
+    elif invoke_arg[0] == '-vv':
+        assert enable_spy.called
+        assert not disable_spy.called
+        assert add_spy.mock_calls[0].kwargs == {
+            'format': '{time} {message}',
+            'filter': 'asyncpg-migrate',
+            'level': 'DEBUG',
+        }
+    elif invoke_arg[0] == '-vvv':
+        assert enable_spy.called
+        assert not disable_spy.called
+        assert add_spy.mock_calls[0].kwargs == {
+            'format': '{time} {message}',
+            'filter': 'asyncpg-migrate',
+            'level': 'TRACE',
+        }
     else:
         assert not enable_spy.called
         assert disable_spy.called
+        assert not add_spy.called

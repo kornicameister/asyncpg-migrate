@@ -1,5 +1,6 @@
 import asyncio
 from pathlib import Path
+import sys
 import typing as t
 
 import asyncpg
@@ -23,21 +24,14 @@ def version() -> None:
 
 @click.group()
 @click.option(
+    '-v',
     '--verbose',
-    'logging_enabled',
-    default=False,
-    flag_value=True,
+    count=True,
     help='Enables rich output',
 )
 @click.option(
-    '--quiet',
-    'logging_enabled',
-    flag_value=False,
-    help='Enables quiet output',
-)
-@click.option(
-    '--config',
     '-c',
+    '--config',
     type=Path,
     default=Path.cwd() / 'migrations.ini',
 )
@@ -45,14 +39,32 @@ def version() -> None:
 def db(
         ctx: click.Context,
         config: Path,
-        logging_enabled: bool = False,
+        verbose: int,
 ) -> None:
     """DB migration tool for asynpg.
     """
-    if logging_enabled:
-        logger.enable('asyncpg_migrate')
+
+    if verbose == 0:
+        logger.disable('asyncpg-migrate')
     else:
-        logger.disable('asyncpg_migrate')
+        logger.enable('asyncpg-migrate')
+        verbosity = {
+            1: 'INFO',
+            2: 'DEBUG',
+            3: 'TRACE',
+        }
+        logger.add(
+            sys.stderr,
+            format='{time} {message}',
+            filter='asyncpg-migrate',
+            level=verbosity.get(verbose, 'TRACE'),
+        )
+
+    logger.debug(
+        'Flags are config={config}, verbose={verbose}',
+        config=config,
+        verbose=verbose,
+    )
 
     # ctx.obj = loader.load_configuration(
     # cwd=Path.cwd(),
@@ -144,4 +156,4 @@ def history(ctx: click.Context) -> None:
 
 
 if __name__ == '__main__':
-    db()
+    db(auto_envvar_prefix='APG')
