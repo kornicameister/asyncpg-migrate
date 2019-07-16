@@ -20,7 +20,7 @@ def test_load_configuration_env(
 
     assert config.database_name == config_env[2]['postgres_database']
     assert config.database_dsn
-    assert config.script_location
+    assert config.script_location == Path.cwd() / config_env[1]
 
 
 def test_load_migrations(

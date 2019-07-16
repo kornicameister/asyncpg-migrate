@@ -88,7 +88,7 @@ def config_with_migrations(
         )
 
     return script_location, model.Config(
-        script_location=tmp_path,
+        script_location=script_location,
         database_name=mocker.stub(),
         database_dsn=mocker.stub(),
     ), migrations_count
