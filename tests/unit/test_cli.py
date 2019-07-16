@@ -1,5 +1,5 @@
-import collections
 import typing as t
+from dataclasses import dataclass
 
 import click
 from click import testing
@@ -80,3 +80,41 @@ def test_db_verbosity(
         assert not enable_spy.called
         assert disable_spy.called
         assert not add_spy.called
+
+
+@pytest.mark.parametrize(
+    'revision',
+    [
+        'head',
+        'HEAD',
+        '5',
+    ],
+)
+def test_db_upgrade(
+        cli_runner: testing.CliRunner,
+        mocker: ptm.MockFixture,
+        revision: str,
+) -> None:
+    @dataclass
+    class MockedConfig:
+        database_dsn: str
+
+    database_dsn = 'postgres://test:test@test:5432/test'
+    db_connection = object()
+    _ = mocker.patch(
+        'asyncpg_migrate.loader.load_configuration',
+        return_value=MockedConfig(database_dsn),
+    )
+    connect_patch = mocker.patch(
+        'asyncpg.connect',
+        return_value=db_connection,
+    )
+    upgrade_patch = mocker.patch('asyncpg_migrate.engine.upgrade.run')
+
+    from asyncpg_migrate import main
+
+    result = cli_runner.invoke(main.upgrade_cmd, revision)
+
+    assert result.exit_code == 0
+    connect_patch.assert_called_once_with(database_dsn)
+    upgrade_patch.assert_called_once_with(db_connection)
