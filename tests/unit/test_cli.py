@@ -32,7 +32,7 @@ def test_db_help(cli_runner: testing.CliRunner) -> None:
         ['test'],
     ],
 )
-def test_db_quiet_verbose(
+def test_db_verbosity(
         cli_runner: testing.CliRunner,
         mocker: ptm.MockFixture,
         invoke_arg: t.List[str],
@@ -41,6 +41,7 @@ def test_db_quiet_verbose(
     enable_spy = mocker.spy(logger, name='enable')
     disable_spy = mocker.spy(logger, name='disable')
     add_spy = mocker.spy(logger, name='add')
+    _ = mocker.patch('asyncpg_migrate.loader.load_configuration')
 
     from asyncpg_migrate import main
 

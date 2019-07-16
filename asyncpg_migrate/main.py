@@ -8,6 +8,7 @@ import click
 from loguru import logger
 from tabulate import tabulate
 
+from asyncpg_migrate import loader
 from asyncpg_migrate import model
 from asyncpg_migrate.engine import downgrade
 from asyncpg_migrate.engine import migration
@@ -66,10 +67,7 @@ def db(
         verbose=verbose,
     )
 
-    # ctx.obj = loader.load_configuration(
-    # cwd=Path.cwd(),
-    # filename='migrations.ini',
-    # )
+    ctx.obj = loader.load_configuration(config)
 
     click.echo('#' * 42)
     click.echo('##\tMigration tool for asyncpg\t##')
