@@ -1,10 +1,22 @@
-import typing as t
+import asyncio
 from dataclasses import dataclass
+import typing as t
 
 import click
 from click import testing
 import pytest
 import pytest_mock as ptm
+
+
+def get_mock_coro(
+        mocker: ptm.MockFixture,
+        return_value: t.Any = None,
+) -> t.Any:
+    @asyncio.coroutine
+    def mock_coro(*args: t.Any, **kwargs: t.Any) -> t.Any:
+        yield return_value
+
+    return mocker.Mock(wraps=mock_coro)
 
 
 def test_version(cli_runner: testing.CliRunner) -> None:
@@ -105,11 +117,15 @@ def test_db_upgrade(
         'asyncpg_migrate.loader.load_configuration',
         return_value=MockedConfig(database_dsn),
     )
+
     connect_patch = mocker.patch(
         'asyncpg.connect',
-        return_value=db_connection,
+        return_value=get_mock_coro(mocker, db_connection),
     )
-    upgrade_patch = mocker.patch('asyncpg_migrate.engine.upgrade.run')
+    upgrade_patch = mocker.patch(
+        'asyncpg_migrate.engine.upgrade.run',
+        return_value=get_mock_coro(mocker),
+    )
 
     from asyncpg_migrate import main
 
