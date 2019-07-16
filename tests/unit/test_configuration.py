@@ -10,8 +10,16 @@ from asyncpg_migrate import model
 EnvironValues = t.Dict[str, str]
 
 
-@pytest.fixture(scope='session')
-def config_env(tmp_path_factory: t.Any) -> t.Tuple[Path, EnvironValues]:
+@pytest.fixture(
+    params=[
+        'relative',
+        'absolute',
+    ],
+)
+def config_env(
+        tmp_path_factory: t.Any,
+        request: t.Any,
+) -> t.Tuple[Path, EnvironValues]:
     tmp_path = tmp_path_factory.mktemp(__name__)
     cf = tmp_path / str(dt.datetime.utcnow())
     cf.touch(exist_ok=False)
@@ -35,7 +43,13 @@ def config_env(tmp_path_factory: t.Any) -> t.Tuple[Path, EnvironValues]:
         'postgres_database': 'internal',
     }
 
-    return cf.absolute(), environ
+    cf_path = cf.absolute()
+    if request.param == 'relative':
+        cf_path = Path(
+            '/'.join(['..' for _ in range(len(cf.absolute().parents) + 1)]) + str(cf),
+        )
+
+    return cf_path, environ
 
 
 @pytest.fixture
@@ -77,10 +91,7 @@ def test_load_configuration_env(
         'os.environ',
         config_env[1],
     )
-    config = loader.load_configuration(
-        cwd=config_env[0].parent,
-        filename=config_env[0].name,
-    )
+    config = loader.load_configuration(filename=config_env[0])
 
     assert config.database_name == config_env[1]['postgres_database']
     assert config.database_dsn
