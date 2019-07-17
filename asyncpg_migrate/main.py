@@ -19,6 +19,7 @@ __name__ = 'asyncpg-migrate'
 try:
     async_run = asyncio.run
 except AttributeError:
+    # Python 3.6 compatybility
     _T = t.NewType('_T', object)
 
     def async_run(coro: t.Awaitable[_T]) -> _T:  # type: ignore
