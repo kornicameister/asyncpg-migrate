@@ -8,17 +8,6 @@ import pytest
 import pytest_mock as ptm
 
 
-def get_mock_coro(
-        mocker: ptm.MockFixture,
-        return_value: t.Any = None,
-) -> t.Any:
-    @asyncio.coroutine
-    def mock_coro(*args: t.Any, **kwargs: t.Any) -> t.Any:
-        yield return_value
-
-    return mocker.Mock(wraps=mock_coro)
-
-
 def test_version(cli_runner: testing.CliRunner) -> None:
     from asyncpg_migrate import main
     result = cli_runner.invoke(main.version)
@@ -94,14 +83,7 @@ def test_db_verbosity(
         assert not add_spy.called
 
 
-@pytest.mark.parametrize(
-    'revision',
-    [
-        'head',
-        'HEAD',
-        '5',
-    ],
-)
+@pytest.mark.parametrize('revision', ['head', 'HEAD', '5'])
 def test_db_upgrade(
         cli_runner: testing.CliRunner,
         mocker: ptm.MockFixture,
@@ -112,19 +94,20 @@ def test_db_upgrade(
         database_dsn: str
 
     database_dsn = 'postgres://test:test@test:5432/test'
+    mocked_config = MockedConfig(database_dsn)
     db_connection = object()
     _ = mocker.patch(
         'asyncpg_migrate.loader.load_configuration',
-        return_value=MockedConfig(database_dsn),
+        return_value=mocked_config,
     )
 
     connect_patch = mocker.patch(
         'asyncpg.connect',
-        return_value=get_mock_coro(mocker, db_connection),
+        side_effect=asyncio.coroutine(lambda dsn: db_connection),
     )
     upgrade_patch = mocker.patch(
         'asyncpg_migrate.engine.upgrade.run',
-        return_value=get_mock_coro(mocker),
+        side_effect=asyncio.coroutine(lambda *args, **kwargs: None),
     )
 
     from asyncpg_migrate import main
@@ -132,5 +115,49 @@ def test_db_upgrade(
     result = cli_runner.invoke(main.db, f'upgrade {revision}')
 
     assert result.exit_code == 0
-    connect_patch.assert_called_once_with(database_dsn)
-    upgrade_patch.assert_called_once_with(db_connection)
+    connect_patch.assert_called_once_with(dsn=database_dsn)
+    upgrade_patch.assert_called_once_with(
+        connection=db_connection,
+        config=mocked_config,
+        target_revision=revision.upper(),
+    )
+
+
+@pytest.mark.parametrize('revision', ['BASE', 'base', '5', '-4'])
+def test_db_downgrade(
+        cli_runner: testing.CliRunner,
+        mocker: ptm.MockFixture,
+        revision: str,
+) -> None:
+    @dataclass
+    class MockedConfig:
+        database_dsn: str
+
+    database_dsn = 'postgres://test:test@test:5432/test'
+    mocked_config = MockedConfig(database_dsn)
+    db_connection = object()
+    _ = mocker.patch(
+        'asyncpg_migrate.loader.load_configuration',
+        return_value=mocked_config,
+    )
+
+    connect_patch = mocker.patch(
+        'asyncpg.connect',
+        side_effect=asyncio.coroutine(lambda dsn: db_connection),
+    )
+    downgrade_patch = mocker.patch(
+        'asyncpg_migrate.engine.downgrade.run',
+        side_effect=asyncio.coroutine(lambda *args, **kwargs: None),
+    )
+
+    from asyncpg_migrate import main
+
+    result = cli_runner.invoke(main.db, f'downgrade -- {revision}')
+
+    assert result.exit_code == 0
+    connect_patch.assert_called_once_with(dsn=database_dsn)
+    downgrade_patch.assert_called_once_with(
+        connection=db_connection,
+        config=mocked_config,
+        target_revision=revision.upper(),
+    )

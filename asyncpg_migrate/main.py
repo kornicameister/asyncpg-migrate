@@ -82,7 +82,7 @@ def db(
 @click.argument(
     'revision',
     metavar='<revision>',
-    default='head',
+    required=True,
     type=str.upper,
 )
 @click.pass_context
