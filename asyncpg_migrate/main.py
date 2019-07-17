@@ -16,6 +16,14 @@ from asyncpg_migrate.engine import upgrade
 
 __name__ = 'asyncpg-migrate'
 
+try:
+    async_run = asyncio.run
+except AttributeError:
+    _T = t.NewType('_T', object)
+
+    def async_run(coro: t.Awaitable[_T]) -> _T:  # type: ignore
+        return asyncio.get_event_loop().run_until_complete(coro)
+
 
 @click.command(short_help='Prints application version')
 def version() -> None:
@@ -94,7 +102,7 @@ def upgrade_cmd(ctx: click.Context, revision: str) -> None:
             connection=await asyncpg.connect(dsn=ctx.obj.database_dsn),
         )
 
-    asyncio.run(_runner())
+    async_run(_runner())
 
 
 @db.command(
@@ -116,7 +124,7 @@ def downgrade_cmd(ctx: click.Context, revision: str) -> None:
             connection=await asyncpg.connect(dsn=ctx.obj.database_dsn),
         )
 
-    asyncio.run(_runner())
+    async_run(_runner())
 
 
 @db.command(short_help='Prints current revision in remote database')
@@ -127,7 +135,7 @@ def revision(ctx: click.Context) -> None:
             connection=await asyncpg.connect(dsn=ctx.obj.database_dsn),
         )
 
-    db_revision = asyncio.run(_runner())
+    db_revision = async_run(_runner())
     if db_revision is None:
         raise click.ClickException('No revisions found...')
     else:
@@ -142,7 +150,7 @@ def history(ctx: click.Context) -> None:
             connection=await asyncpg.connect(dsn=ctx.obj.database_dsn),
         )
 
-    mig_history = asyncio.run(_runner())
+    mig_history = async_run(_runner())
     click.echo(f'Database {ctx.obj.database_name} history migration')
     click.echo(
         tabulate(
