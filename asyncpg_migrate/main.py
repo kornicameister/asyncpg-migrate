@@ -128,9 +128,12 @@ def downgrade_cmd(ctx: click.Context, revision: str) -> None:
     async_run(_runner())
 
 
-@db.command(short_help='Prints current revision in remote database')
+@db.command(
+    name='revision',
+    short_help='Prints current revision in remote database',
+)
 @click.pass_context
-def revision(ctx: click.Context) -> None:
+def revision_cmd(ctx: click.Context) -> None:
     async def _runner() -> t.Optional[model.Revision]:
         return await migration.latest_revision(
             connection=await asyncpg.connect(dsn=ctx.obj.database_dsn),
@@ -138,7 +141,9 @@ def revision(ctx: click.Context) -> None:
 
     db_revision = async_run(_runner())
     if db_revision is None:
-        raise click.ClickException('No revisions found...')
+        raise click.ClickException(
+            'No revisions found, you might want to run some migrations first :)',
+        )
     else:
         click.echo(f'Current database revision is {db_revision}')
 
@@ -152,14 +157,19 @@ def history(ctx: click.Context) -> None:
         )
 
     mig_history = async_run(_runner())
-    click.echo(f'Database {ctx.obj.database_name} history migration')
-    click.echo(
-        tabulate(
-            [[m.revision, m.label, m.timestamp, m.direction] for m in mig_history],
-            headers=['No.', 'Revision', 'Lable', 'TS', 'Direction'],
-            showindex='1',
-        ),
-    )
+    if not mig_history:
+        raise click.ClickException(
+            'No revisions found, you might want to run some migrations first :)',
+        )
+    else:
+        click.echo(f'Database {ctx.obj.database_name} history migration')
+        click.echo(
+            tabulate(
+                [[m.revision, m.label, m.timestamp, m.direction] for m in mig_history],
+                headers=['No.', 'Revision', 'Lable', 'TS', 'Direction'],
+                showindex='1',
+            ),
+        )
 
 
 if __name__ == '__main__':

@@ -1,11 +1,14 @@
 import asyncio
 from dataclasses import dataclass
+import datetime as dt
 import typing as t
 
 import click
 from click import testing
 import pytest
 import pytest_mock as ptm
+
+from asyncpg_migrate import model
 
 
 def test_version(cli_runner: testing.CliRunner) -> None:
@@ -161,3 +164,91 @@ def test_db_downgrade(
         config=mocked_config,
         target_revision=revision.upper(),
     )
+
+
+@pytest.mark.parametrize('return_revision', [None, 0, 1])
+def test_db_revision(
+        cli_runner: testing.CliRunner,
+        mocker: ptm.MockFixture,
+        return_revision: t.Optional[int],
+) -> None:
+    @dataclass
+    class MockedConfig:
+        database_dsn: str
+
+    mocker.patch(
+        'asyncpg_migrate.loader.load_configuration',
+        return_value=MockedConfig('postgres://test:test@test:5432/test'),
+    )
+    mocker.patch(
+        'asyncpg.connect',
+        side_effect=asyncio.coroutine(lambda dsn: object()),
+    )
+    mocker.patch(
+        'asyncpg_migrate.engine.migration.latest_revision',
+        side_effect=asyncio.coroutine(lambda *args, **kwargs: return_revision),
+    )
+
+    from asyncpg_migrate import main
+
+    result = cli_runner.invoke(main.db, 'revision')
+
+    if return_revision is None:
+        assert result.exception is not None
+        assert result.exit_code == 1
+        assert 'No revisions found, you might want to run some migrations first :)' in \
+            result.output
+    else:
+        assert result.exception is None
+        assert result.exit_code == 0
+        assert f'Current database revision is {return_revision}' in result.output
+
+
+@pytest.mark.parametrize('entries_count', [0, 1, 3, 7, 10])
+def test_db_history(
+        cli_runner: testing.CliRunner,
+        mocker: ptm.MockFixture,
+        entries_count: int,
+) -> None:
+    @dataclass
+    class MockedConfig:
+        database_dsn: str
+        database_name: str
+
+    entries = model.MigrationHistory([
+        model.MigrationHistoryEntry(
+            revision=model.Revision(rev),
+            timestamp=model.Timestamp(dt.datetime.today()),
+            label=mocker.stub(),
+            direction=model.MigrationDir.UP if rev % 2 else model.MigrationDir.DOWN,
+        ) for rev in range(entries_count)
+    ])
+
+    mocker.patch(
+        'asyncpg_migrate.loader.load_configuration',
+        return_value=MockedConfig(
+            'postgres://test:test@test:5432/test',
+            'test',
+        ),
+    )
+    mocker.patch(
+        'asyncpg.connect',
+        side_effect=asyncio.coroutine(lambda dsn: object()),
+    )
+    mocker.patch(
+        'asyncpg_migrate.engine.migration.list',
+        side_effect=asyncio.coroutine(lambda *args, **kwargs: entries),
+    )
+
+    from asyncpg_migrate import main
+
+    result = cli_runner.invoke(main.db, 'history')
+    if not entries_count:
+        assert result.exception is not None
+        assert result.exit_code == 1
+        assert 'No revisions found, you might want to run some migrations first :)' in \
+            result.output
+    else:
+        assert result.exception is None
+        assert result.exit_code == 0
+        assert len(result.output.split('\n')[8:]) - 1 == entries_count
