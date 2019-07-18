@@ -49,6 +49,8 @@ jobs:
       - run:
           name: Check flake
           command: tox -e flake8
+      - store_artifacts:
+          path: typingcov
   test_36:
     <<: *test_steps
     docker:
@@ -95,4 +97,4 @@ workflows:
       - test_install:
           requires:
             - verify
-            - test_374  # only require latest python check to pass
+            - test_374 # only require latest python check to pass
