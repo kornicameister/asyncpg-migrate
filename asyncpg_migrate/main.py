@@ -8,6 +8,7 @@ import click
 from loguru import logger
 from tabulate import tabulate
 
+import asyncpg_migrate
 from asyncpg_migrate import loader
 from asyncpg_migrate import model
 from asyncpg_migrate.engine import downgrade
@@ -20,16 +21,10 @@ try:
     async_run = asyncio.run
 except AttributeError:
     # Python 3.6 compatybility
-    _T = t.NewType('_T', object)
+    _T = t.TypeVar('_T')
 
     def async_run(coro: t.Awaitable[_T]) -> _T:  # type: ignore
         return asyncio.get_event_loop().run_until_complete(coro)
-
-
-@click.command(short_help='Prints application version')
-def version() -> None:
-    version = 'dev'
-    click.echo(f'{__name__}: {version}')
 
 
 @click.group()
@@ -54,6 +49,7 @@ def db(
     """DB migration tool for asynpg.
     """
 
+    logger.error(ctx)
     if verbose == 0:
         logger.disable('asyncpg-migrate')
     else:
@@ -76,12 +72,14 @@ def db(
         verbose=verbose,
     )
 
-    ctx.obj = loader.load_configuration(config)
+    ctx.ensure_object(dict)
+    ctx.obj['configuration_file_path'] = config
 
-    click.echo('#' * 42)
-    click.echo('##\tMigration tool for asyncpg\t##')
-    click.echo('#' * 42)
-    click.echo('\n')
+
+@db.command(short_help='Prints application version')
+def version() -> None:
+    version = asyncpg_migrate.__version__
+    click.echo(f'v{version}')
 
 
 @db.command(
@@ -97,10 +95,11 @@ def db(
 @click.pass_context
 def upgrade_cmd(ctx: click.Context, revision: str) -> None:
     async def _runner() -> t.Optional[model.Revision]:
+        config = loader.load_configuration(ctx.obj['configuration_file_path'])
         return await upgrade.run(
-            config=ctx.obj,
+            config=config,
             target_revision=revision,
-            connection=await asyncpg.connect(dsn=ctx.obj.database_dsn),
+            connection=await asyncpg.connect(dsn=config.database_dsn),
         )
 
     async_run(_runner())
@@ -119,10 +118,11 @@ def upgrade_cmd(ctx: click.Context, revision: str) -> None:
 @click.pass_context
 def downgrade_cmd(ctx: click.Context, revision: str) -> None:
     async def _runner() -> t.Optional[model.Revision]:
+        config = loader.load_configuration(ctx.obj['configuration_file_path'])
         return await downgrade.run(
-            config=ctx.obj,
+            config=config,
             target_revision=revision,
-            connection=await asyncpg.connect(dsn=ctx.obj.database_dsn),
+            connection=await asyncpg.connect(dsn=config.database_dsn),
         )
 
     async_run(_runner())
@@ -135,8 +135,9 @@ def downgrade_cmd(ctx: click.Context, revision: str) -> None:
 @click.pass_context
 def revision_cmd(ctx: click.Context) -> None:
     async def _runner() -> t.Optional[model.Revision]:
+        config = loader.load_configuration(ctx.obj['configuration_file_path'])
         return await migration.latest_revision(
-            connection=await asyncpg.connect(dsn=ctx.obj.database_dsn),
+            connection=await asyncpg.connect(dsn=config.database_dsn),
         )
 
     db_revision = async_run(_runner())
@@ -151,18 +152,19 @@ def revision_cmd(ctx: click.Context) -> None:
 @db.command(short_help='Prints migrations history')
 @click.pass_context
 def history(ctx: click.Context) -> None:
-    async def _runner() -> model.MigrationHistory:
+    async def _runner(cfg: model.Config) -> model.MigrationHistory:
         return await migration.list(
-            connection=await asyncpg.connect(dsn=ctx.obj.database_dsn),
+            connection=await asyncpg.connect(dsn=cfg.database_dsn),
         )
 
-    mig_history = async_run(_runner())
+    config = loader.load_configuration(ctx.obj['configuration_file_path'])
+    mig_history = async_run(_runner(config))
     if not mig_history:
         raise click.ClickException(
             'No revisions found, you might want to run some migrations first :)',
         )
     else:
-        click.echo(f'Database {ctx.obj.database_name} history migration')
+        click.echo(f'Database {config.database_name} history migration')
         click.echo(
             tabulate(
                 [[m.revision, m.label, m.timestamp, m.direction] for m in mig_history],

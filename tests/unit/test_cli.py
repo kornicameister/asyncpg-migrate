@@ -13,9 +13,8 @@ from asyncpg_migrate import model
 
 def test_version(cli_runner: testing.CliRunner) -> None:
     from asyncpg_migrate import main
-    result = cli_runner.invoke(main.version)
+    result = cli_runner.invoke(main.db, 'version')
     assert result.exit_code == 0
-    assert 'asyncpg-migrate: ' in result.output
 
 
 def test_db_help(cli_runner: testing.CliRunner) -> None:
@@ -251,4 +250,4 @@ def test_db_history(
     else:
         assert result.exception is None
         assert result.exit_code == 0
-        assert len(result.output.split('\n')[8:]) - 1 == entries_count
+        assert len(result.output.split('\n')[3:]) - 1 == entries_count
