@@ -43,7 +43,7 @@ def read_requirements(
 setuptools.setup(
     setup_requires='setupmeta',
     # setupmeta options
-    versioning='distance',
+    versioning='post',
     # custom overrides
     install_requires=read_requirements(Path('./requirements.txt')),
     tests_require=read_requirements(Path('./test-requirements.txt')),

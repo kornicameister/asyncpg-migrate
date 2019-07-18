@@ -1,13 +1,17 @@
 import datetime as dt
+import functools
 import typing as t
 
 import asyncpg
 import asyncpg.exceptions
-from decorator import decorator
 from loguru import logger
 
 from asyncpg_migrate import constants
 from asyncpg_migrate import model
+
+MT = t.TypeVar('MT')
+A_T = t.TypeVar('A_T')
+K_T = t.TypeVar('K_T')
 
 
 class MigrationTableMissing(Exception):
@@ -18,20 +22,23 @@ class MigrationProcessingError(Exception):
     ...
 
 
-@decorator
-async def error_trap(
-        func: t.Callable[..., t.Awaitable[t.Any]],
-        *args: t.Any,
-        **kwargs: t.Any,
-) -> t.Any:
-    try:
-        return await func(*args, **kwargs)
-    except asyncpg.exceptions.UndefinedTableError as ex:
-        logger.exception('Migration table is gone, you need to run migrations first')
-        raise MigrationTableMissing() from ex
-    except Exception as ex:
-        logger.exception('Unknown error occurred')
-        raise MigrationProcessingError() from ex
+def error_trap(
+        func: t.Callable[..., t.Coroutine[t.Any, t.Any, MT]],
+        *args: A_T,
+        **kwargs: K_T,
+) -> t.Callable[..., t.Coroutine[t.Any, t.Any, MT]]:
+    @functools.wraps(func)
+    async def wrapper(*args: A_T, **kwargs: K_T) -> MT:
+        try:
+            return await func(*args, **kwargs)
+        except asyncpg.exceptions.UndefinedTableError as ex:
+            logger.exception('Migration table is gone, you need to run migrations first')
+            raise MigrationTableMissing() from ex
+        except Exception as ex:
+            logger.exception('Unknown error occurred')
+            raise MigrationProcessingError() from ex
+
+    return wrapper
 
 
 @error_trap
