@@ -80,8 +80,40 @@ jobs:
           name: setup.py install
           command: python setup.py install
 
+  deploy:
+    docker:
+      - image: circleci/python:3.7.4
+    working_directory: ~/app
+    steps:
+      - checkout
+      - <<: *install_prepare
+      - run: pip install twine
+      - run: python setup.py twine --commit --rebuild --egg=all
+
 workflows:
   version: 2
+  apg-m-release:
+    jobs:
+      - verify:
+          filters: &release_filters
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+          requires:
+            - test_36
+            - test_374
+      - test_36:
+          filters:
+            <<: *release_filters
+      - test_374:
+          filters:
+            <<: *release_filters
+      - deploy:
+          filters:
+            <<: *release_filters
+          requires:
+            - verify
   apg-m-verify:
     jobs:
       - verify
