@@ -88,7 +88,7 @@ jobs:
       - checkout
       - <<: *install_prepare
       - run: pip install twine
-      - run: python setup.py twine --commit --rebuild --egg=all
+      - run: python setup.py twine --commit --rebuild --egg=all --sdist=all
 
 workflows:
   version: 2
