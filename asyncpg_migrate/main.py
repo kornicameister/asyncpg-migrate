@@ -49,7 +49,6 @@ def db(
     """DB migration tool for asynpg.
     """
 
-    logger.error(ctx)
     if verbose == 0:
         logger.disable('asyncpg-migrate')
     else:
