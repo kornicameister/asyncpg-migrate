@@ -2,9 +2,6 @@ Development Status :: 2 - Pre-Alpha
 
 Environment :: Console
 
-Framework :: Click
-Framework :: Asyncpg
-
 Intended Audience :: Developers
 Intended Audience :: System Administrators
 
@@ -12,7 +9,6 @@ License :: OSI Approved :: Apache Software License
 
 Operating System :: Unix
 Operating System :: POSIX
-Operating System :: POSIX :: LINUX
 
 Programming Language :: Python :: 3
 Programming Language :: Python :: 3.6
