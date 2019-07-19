@@ -2,9 +2,6 @@ Development Status :: 2 - Pre-Alpha
 
 Environment :: Console
 
-Framework :: Click
-Framework :: Asyncpg
-
 Intended Audience :: Developers
 Intended Audience :: System Administrators
 
