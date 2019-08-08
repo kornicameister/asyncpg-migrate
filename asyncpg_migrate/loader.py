@@ -19,6 +19,7 @@ def load_configuration(filename: Path) -> model.Config:
 
     parser = configparser.ConfigParser(
         defaults=os.environ,
+        default_section='migrations',
         interpolation=configparser.ExtendedInterpolation(),
     )
     parser.read(filename)
