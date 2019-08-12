@@ -41,14 +41,8 @@ jobs:
       - checkout
       - <<: *install_prepare
       - run:
-          name: Check formatting
-          command: tox -e yapf
-      - run:
-          name: Check mypy
-          command: tox -e mypy
-      - run:
-          name: Check flake
-          command: tox -e flake8
+          name: Verify
+          command: tox -e yapf,mypy,flake8 -p auto
       - store_artifacts:
           path: typingcov
   test:
