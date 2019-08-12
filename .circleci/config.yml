@@ -48,6 +48,8 @@ jobs:
   test:
     docker:
       - image: circleci/python:3.7.4
+      - image: postgres:alpine
+        <<: *postgres_env
     working_directory: ~/app
     steps:
       - checkout
@@ -79,7 +81,7 @@ jobs:
           command: |
             eval "$(pyenv init -)"
             pyenv shell 3.6.8 3.7.4
-            tox -p auto
+            tox
       - store_test_results:
           path: test-reports
       - store_artifacts:
