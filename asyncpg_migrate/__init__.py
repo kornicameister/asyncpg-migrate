@@ -1,5 +1,8 @@
-import uvloop
-
 __version__ = '0.0.4'
 
-uvloop.install()
+try:
+    import uvloop
+    uvloop.install()
+except ImportError:
+    from loguru import logger
+    logger.info('uvloop is not available, skipping...')

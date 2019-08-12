@@ -13,6 +13,9 @@ if sys.version_info < (3, 6):
 
 setuptools.setup(
     setup_requires='setupmeta',
+    extras_require={
+        'uvloop': ['uvloop>=0.12.0'],
+    },
     # setupmeta options
     versioning='post',
 )
