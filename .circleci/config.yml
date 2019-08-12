@@ -13,7 +13,7 @@ x-test-steps: &test_steps
     - <<: *install_prepare
     - run:
         name: Mighty test run
-        command: tox -p auto
+        command: tox -r -p auto
     - store_test_results:
         path: test-reports
     - store_artifacts:
@@ -81,7 +81,7 @@ jobs:
           command: |
             eval "$(pyenv init -)"
             pyenv shell 3.6.8 3.7.4
-            tox
+            tox -r
       - store_test_results:
           path: test-reports
       - store_artifacts:
