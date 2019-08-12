@@ -6,5 +6,4 @@ pytest-asyncio==0.10.0
 pytest-click==0.3
 mock==3.0.5
 
-asyncpg==0.18.3
 Requirements-Builder==0.3.0

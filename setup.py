@@ -13,7 +13,9 @@ if sys.version_info < (3, 6):
 
 setup(
     setup_requires='setupmeta',
+    python_requires='>=3.6.8',
     install_requires=[
+        'asyncpg>=0.17.0',
         'click>=7.0',
         'loguru>=0.3.0',
         'tabulate>=0.8.0',
