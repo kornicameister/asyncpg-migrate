@@ -13,7 +13,7 @@ if sys.version_info < (3, 6):
 
 setup(
     setup_requires='setupmeta',
-    python_requires='>=3.6.8',
+    python_requires='>=3.6.0',
     install_requires=[
         'asyncpg>=0.17.0',
         'click>=7.0',
