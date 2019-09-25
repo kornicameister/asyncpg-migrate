@@ -1,5 +1,5 @@
 click==7.0
 uvloop==0.13.0
 loguru==0.3.2
-tabulate==0.8.3
+tabulate==0.8.4
 dataclasses==0.6 ; python_version < '3.7'
