@@ -4,6 +4,7 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/kornicameister/asyncpg-migrate/badge)](https://www.codefactor.io/repository/github/kornicameister/asyncpg-migrate)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/kornicameister/asyncpg-migrate.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/kornicameister/asyncpg-migrate/context:python)
 [![codecov](https://codecov.io/gh/kornicameister/asyncpg-migrate/branch/master/graph/badge.svg)](https://codecov.io/gh/kornicameister/asyncpg-migrate)
+[![Downloads](https://pepy.tech/badge/asyncpg-migrate)](https://pepy.tech/project/asyncpg-migrate)
 
 # asyncpg-migrate
 Database migration tool that does what alembic does... asynchronously 
