@@ -1,4 +1,4 @@
-tox==3.14.0
+tox==3.14.3
 setupmeta==2.6.7
 
 -r requirements/yapf.txt
