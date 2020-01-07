@@ -15,9 +15,9 @@ from asyncpg_migrate import model
     ],
 )
 def config_env(
-        tmp_path: Path,
-        request: t.Any,
-        config_with_migrations: t.Tuple[Path, model.Config, int],
+    tmp_path: Path,
+    request: t.Any,
+    config_with_migrations: t.Tuple[Path, model.Config, int],
 ) -> t.Tuple[Path, Path, t.Dict[str, str]]:
     script_location, _, _ = config_with_migrations
     cf = tmp_path / str(dt.datetime.utcnow())
