@@ -1,6 +1,6 @@
 import sys
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 __title__ = 'asyncpg-migrate'
 __author__ = 'Tomasz Trębski'
@@ -21,6 +21,7 @@ setup(
         'tabulate>=0.8.0',
         'dataclasses>=0.6 ; python_version < "3.7"',
     ],
+    packages=find_packages(include=['asyncpg_migrate', 'asyncpg_migrate.*']),
     extras_require={
         'uvloop': ['uvloop>=0.12.0'],
     },
