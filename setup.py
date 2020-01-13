@@ -15,11 +15,11 @@ setup(
     setup_requires='setupmeta',
     python_requires='>=3.6.0',
     install_requires=[
-        'asyncpg>=0.17.0',
+        'asyncpg>=0.20.0',
         'click>=7.0',
         'loguru>=0.3.0',
         'tabulate>=0.8.0',
-        'dataclasses>=0.6 ; python_version < "3.7"',
+        'dataclasses>=0.7 ; python_version < "3.7"',
     ],
     extras_require={
         'uvloop': ['uvloop>=0.12.0'],
