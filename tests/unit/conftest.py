@@ -58,9 +58,9 @@ def config_env(
     ],
 )
 def config_with_migrations(
-        tmp_path: Path,
-        mocker: ptm.MockFixture,
-        request: t.Any,
+    tmp_path: Path,
+    mocker: ptm.MockFixture,
+    request: t.Any,
 ) -> t.Tuple[Path, model.Config, int]:
     migrations_count = 10
     script_location = tmp_path

@@ -51,10 +51,10 @@ async def clean_db(db_connection: asyncpg.Connection) -> t.AsyncGenerator[None, 
     ],
 )
 def migration_config(
-        db_name: str,
-        db_dsn: str,
-        tmp_path_factory: t.Any,
-        request: t.Any,
+    db_name: str,
+    db_dsn: str,
+    tmp_path_factory: t.Any,
+    request: t.Any,
 ) -> t.Tuple[model.Config, int]:
     tmp_path = tmp_path_factory.mktemp(__name__)
     migrations_count = request.param

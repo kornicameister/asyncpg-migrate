@@ -7,8 +7,8 @@ from asyncpg_migrate import model
 
 
 def test_load_configuration_env(
-        config_env: t.Tuple[Path, Path, t.Dict[str, str]],
-        mocker: ptm.MockFixture,
+    config_env: t.Tuple[Path, Path, t.Dict[str, str]],
+    mocker: ptm.MockFixture,
 ) -> None:
     from asyncpg_migrate import loader
 
@@ -24,7 +24,7 @@ def test_load_configuration_env(
 
 
 def test_load_migrations(
-        config_with_migrations: t.Tuple[Path, model.Config, int],
+    config_with_migrations: t.Tuple[Path, model.Config, int],
 ) -> None:
     from asyncpg_migrate import loader
 

@@ -18,9 +18,9 @@ from asyncpg_migrate.engine import upgrade
     ],
 )
 async def test_upgrade(
-        migration_config: t.Tuple[model.Config, int],
-        db_connection: asyncpg.Connection,
-        target_revision: str,
+    migration_config: t.Tuple[model.Config, int],
+    db_connection: asyncpg.Connection,
+    target_revision: str,
 ) -> None:
     config, migrations_count = migration_config
 
@@ -55,8 +55,8 @@ async def test_upgrade(
 
 @pytest.mark.asyncio
 async def test_upgrade_stepped(
-        migration_config: t.Tuple[model.Config, int],
-        db_connection: asyncpg.Connection,
+    migration_config: t.Tuple[model.Config, int],
+    db_connection: asyncpg.Connection,
 ) -> None:
     config, migrations_count = migration_config
     if migrations_count:
@@ -76,8 +76,8 @@ async def test_upgrade_stepped(
 
 @pytest.mark.asyncio
 async def test_upgrade_skip_revision_exists(
-        migration_config: t.Tuple[model.Config, int],
-        db_connection: asyncpg.Connection,
+    migration_config: t.Tuple[model.Config, int],
+    db_connection: asyncpg.Connection,
 ) -> None:
     config, migrations_count = migration_config
     if migrations_count:
@@ -106,8 +106,8 @@ async def test_upgrade_skip_revision_exists(
 
 @pytest.mark.asyncio
 async def test_upgrade_to_lower_revision(
-        migration_config: t.Tuple[model.Config, int],
-        db_connection: asyncpg.Connection,
+    migration_config: t.Tuple[model.Config, int],
+    db_connection: asyncpg.Connection,
 ) -> None:
     config, migrations_count = migration_config
     if migrations_count:
