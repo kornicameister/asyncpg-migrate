@@ -36,9 +36,9 @@ def test_db_help(cli_runner: testing.CliRunner) -> None:
     ],
 )
 def test_db_verbosity(
-        cli_runner: testing.CliRunner,
-        mocker: ptm.MockFixture,
-        invoke_arg: t.List[str],
+    cli_runner: testing.CliRunner,
+    mocker: ptm.MockFixture,
+    invoke_arg: t.List[str],
 ) -> None:
     from loguru import logger
     enable_spy = mocker.spy(logger, name='enable')
@@ -87,9 +87,9 @@ def test_db_verbosity(
 
 @pytest.mark.parametrize('revision', ['head', 'HEAD', '5'])
 def test_db_upgrade(
-        cli_runner: testing.CliRunner,
-        mocker: ptm.MockFixture,
-        revision: str,
+    cli_runner: testing.CliRunner,
+    mocker: ptm.MockFixture,
+    revision: str,
 ) -> None:
     @dataclass
     class MockedConfig:
@@ -127,9 +127,9 @@ def test_db_upgrade(
 
 @pytest.mark.parametrize('revision', ['BASE', 'base', '5', '-4'])
 def test_db_downgrade(
-        cli_runner: testing.CliRunner,
-        mocker: ptm.MockFixture,
-        revision: str,
+    cli_runner: testing.CliRunner,
+    mocker: ptm.MockFixture,
+    revision: str,
 ) -> None:
     @dataclass
     class MockedConfig:
@@ -167,9 +167,9 @@ def test_db_downgrade(
 
 @pytest.mark.parametrize('return_revision', [None, 0, 1])
 def test_db_revision(
-        cli_runner: testing.CliRunner,
-        mocker: ptm.MockFixture,
-        return_revision: t.Optional[int],
+    cli_runner: testing.CliRunner,
+    mocker: ptm.MockFixture,
+    return_revision: t.Optional[int],
 ) -> None:
     @dataclass
     class MockedConfig:
@@ -205,9 +205,9 @@ def test_db_revision(
 
 @pytest.mark.parametrize('entries_count', [0, 1, 3, 7, 10])
 def test_db_history(
-        cli_runner: testing.CliRunner,
-        mocker: ptm.MockFixture,
-        entries_count: int,
+    cli_runner: testing.CliRunner,
+    mocker: ptm.MockFixture,
+    entries_count: int,
 ) -> None:
     @dataclass
     class MockedConfig:
