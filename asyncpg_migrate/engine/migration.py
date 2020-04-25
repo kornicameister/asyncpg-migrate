@@ -23,9 +23,9 @@ class MigrationProcessingError(Exception):
 
 
 def error_trap(
-        func: t.Callable[..., t.Coroutine[t.Any, t.Any, MT]],
-        *args: A_T,
-        **kwargs: K_T,
+    func: t.Callable[..., t.Coroutine[t.Any, t.Any, MT]],
+    *args: A_T,
+    **kwargs: K_T,
 ) -> t.Callable[..., t.Coroutine[t.Any, t.Any, MT]]:
     @functools.wraps(func)
     async def wrapper(*args: A_T, **kwargs: K_T) -> MT:
@@ -43,9 +43,9 @@ def error_trap(
 
 @error_trap
 async def latest_revision(
-        connection: asyncpg.Connection,
-        table_schema: str = constants.MIGRATIONS_SCHEMA,
-        table_name: str = constants.MIGRATIONS_TABLE,
+    connection: asyncpg.Connection,
+    table_schema: str = constants.MIGRATIONS_SCHEMA,
+    table_name: str = constants.MIGRATIONS_TABLE,
 ) -> t.Optional[model.Revision]:
     await connection.reload_schema_state()
     val = await connection.fetchval(
@@ -61,9 +61,9 @@ async def latest_revision(
 
 
 async def create_table(
-        connection: asyncpg.Connection,
-        table_schema: str = constants.MIGRATIONS_SCHEMA,
-        table_name: str = constants.MIGRATIONS_TABLE,
+    connection: asyncpg.Connection,
+    table_schema: str = constants.MIGRATIONS_SCHEMA,
+    table_name: str = constants.MIGRATIONS_TABLE,
 ) -> None:
     logger.opt(lazy=True).debug(
         'Creating migrations table {table_schema}.{table_name}',
@@ -104,11 +104,11 @@ async def create_table(
 
 @error_trap
 async def save(
-        migration: model.Migration,
-        direction: model.MigrationDir,
-        connection: asyncpg.Connection,
-        table_schema: str = constants.MIGRATIONS_SCHEMA,
-        table_name: str = constants.MIGRATIONS_TABLE,
+    migration: model.Migration,
+    direction: model.MigrationDir,
+    connection: asyncpg.Connection,
+    table_schema: str = constants.MIGRATIONS_SCHEMA,
+    table_name: str = constants.MIGRATIONS_TABLE,
 ) -> None:
     await connection.execute(
         f'insert into '
@@ -128,9 +128,9 @@ async def save(
 
 @error_trap
 async def list(
-        connection: asyncpg.Connection,
-        table_schema: str = constants.MIGRATIONS_SCHEMA,
-        table_name: str = constants.MIGRATIONS_TABLE,
+    connection: asyncpg.Connection,
+    table_schema: str = constants.MIGRATIONS_SCHEMA,
+    table_name: str = constants.MIGRATIONS_TABLE,
 ) -> model.MigrationHistory:
     logger.debug('Getting a history of migrations')
 

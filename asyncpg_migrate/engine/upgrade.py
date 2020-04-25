@@ -10,9 +10,9 @@ from asyncpg_migrate.engine import migration
 
 
 async def run(
-        config: model.Config,
-        target_revision: t.Union[str, int],
-        connection: asyncpg.Connection,
+    config: model.Config,
+    target_revision: t.Union[str, int],
+    connection: asyncpg.Connection,
 ) -> t.Optional[model.Revision]:
     """Executes the UP migration.
 
