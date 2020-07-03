@@ -42,9 +42,9 @@ except AttributeError:
 )
 @click.pass_context
 def db(
-        ctx: click.Context,
-        config: Path,
-        verbose: int,
+    ctx: click.Context,
+    config: Path,
+    verbose: int,
 ) -> None:
     """DB migration tool for asynpg.
     """

@@ -21,9 +21,9 @@ MigrationCallable = t.Callable[[asyncpg.Connection],
 class Revision(int):
     @classmethod
     def decode(
-            cls,
-            rev: t.Union[str, int, 'Revision'],
-            all_revisions: t.Sequence['Revision'] = None,
+        cls,
+        rev: t.Union[str, int, 'Revision'],
+        all_revisions: t.Sequence['Revision'] = None,
     ) -> 'Revision':
         if isinstance(rev, Revision):
             return rev

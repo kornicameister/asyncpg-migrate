@@ -11,8 +11,8 @@ from asyncpg_migrate.engine import upgrade
 
 @pytest.mark.asyncio
 async def test_downgrade_no_revision(
-        migration_config: t.Tuple[model.Config, int],
-        db_connection: asyncpg.Connection,
+    migration_config: t.Tuple[model.Config, int],
+    db_connection: asyncpg.Connection,
 ) -> None:
     config, _ = migration_config
     finished_revision = await downgrade.run(
@@ -34,9 +34,9 @@ async def test_downgrade_no_revision(
     ],
 )
 async def test_downgrade(
-        migration_config: t.Tuple[model.Config, int],
-        db_connection: asyncpg.Connection,
-        target_revision: str,
+    migration_config: t.Tuple[model.Config, int],
+    db_connection: asyncpg.Connection,
+    target_revision: str,
 ) -> None:
     config, migrations_count = migration_config
 
@@ -86,9 +86,9 @@ async def test_downgrade(
     ],
 )
 async def test_downgrade_repeat_no_action_taken(
-        migration_config: t.Tuple[model.Config, int],
-        db_connection: asyncpg.Connection,
-        target_revision: t.Union[str, int],
+    migration_config: t.Tuple[model.Config, int],
+    db_connection: asyncpg.Connection,
+    target_revision: t.Union[str, int],
 ) -> None:
     config, migrations_count = migration_config
     if migrations_count:
@@ -125,9 +125,9 @@ async def test_downgrade_repeat_no_action_taken(
     ],
 )
 async def test_downgrade_stepped(
-        migration_config: t.Tuple[model.Config, int],
-        db_connection: asyncpg.Connection,
-        step_revision: int,
+    migration_config: t.Tuple[model.Config, int],
+    db_connection: asyncpg.Connection,
+    step_revision: int,
 ) -> None:
     config, migrations_count = migration_config
     if migrations_count:

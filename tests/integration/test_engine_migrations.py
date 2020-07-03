@@ -21,9 +21,9 @@ from asyncpg_migrate.engine import upgrade
     ],
 )
 async def test_get_revision_no_migrations_table(
-        db_connection: asyncpg.Connection,
-        table_schema: str,
-        table_name: str,
+    db_connection: asyncpg.Connection,
+    table_schema: str,
+    table_name: str,
 ) -> None:
     with pytest.raises(migration.MigrationTableMissing):
         await migration.latest_revision(
@@ -43,9 +43,9 @@ async def test_get_revision_no_migrations_table(
     ],
 )
 async def test_get_revision_migration_table_exists_no_entries(
-        db_connection: asyncpg.Connection,
-        table_schema: str,
-        table_name: str,
+    db_connection: asyncpg.Connection,
+    table_schema: str,
+    table_name: str,
 ) -> None:
     await migration.create_table(
         connection=db_connection,
@@ -72,10 +72,10 @@ async def test_get_revision_migration_table_exists_no_entries(
     ],
 )
 async def test_get_revision_migration_table_exists_with_entries(
-        db_connection: asyncpg.Connection,
-        table_schema: str,
-        table_name: str,
-        mocker: ptm.MockFixture,
+    db_connection: asyncpg.Connection,
+    table_schema: str,
+    table_name: str,
+    mocker: ptm.MockFixture,
 ) -> None:
     max_revisions = 10
     await migration.create_table(
@@ -117,10 +117,10 @@ async def test_get_revision_migration_table_exists_with_entries(
     ],
 )
 async def test_ensure_create_table(
-        db_connection: asyncpg.Connection,
-        table_schema: str,
-        table_name: str,
-        mocker: ptm.MockFixture,
+    db_connection: asyncpg.Connection,
+    table_schema: str,
+    table_name: str,
+    mocker: ptm.MockFixture,
 ) -> None:
     await migration.create_table(
         connection=db_connection,
@@ -152,8 +152,8 @@ async def test_migration_history_no_revision(db_connection: asyncpg.Connection) 
 
 @pytest.mark.asyncio
 async def test_migration_history_up_head(
-        migration_config: t.Tuple[model.Config, int],
-        db_connection: asyncpg.Connection,
+    migration_config: t.Tuple[model.Config, int],
+    db_connection: asyncpg.Connection,
 ) -> None:
     config, migrations_count = migration_config
     if migrations_count:
@@ -175,8 +175,8 @@ async def test_migration_history_up_head(
 
 @pytest.mark.asyncio
 async def test_migration_history_up_head_down_base(
-        migration_config: t.Tuple[model.Config, int],
-        db_connection: asyncpg.Connection,
+    migration_config: t.Tuple[model.Config, int],
+    db_connection: asyncpg.Connection,
 ) -> None:
     config, migrations_count = migration_config
     if migrations_count:
@@ -204,8 +204,8 @@ async def test_migration_history_up_head_down_base(
 
 @pytest.mark.asyncio
 async def test_migration_history_up_head_down_1(
-        migration_config: t.Tuple[model.Config, int],
-        db_connection: asyncpg.Connection,
+    migration_config: t.Tuple[model.Config, int],
+    db_connection: asyncpg.Connection,
 ) -> None:
     config, migrations_count = migration_config
     if migrations_count:

@@ -26,9 +26,9 @@ from asyncpg_migrate import model
     ],
 )
 def test_revision_decoding(
-        test_revision: t.Union[str, int],
-        expected_revision: t.Union[model.Revision, Exception],
-        all_revisions: t.Sequence[model.Revision],
+    test_revision: t.Union[str, int],
+    expected_revision: t.Union[model.Revision, Exception],
+    all_revisions: t.Sequence[model.Revision],
 ) -> None:
     if type(expected_revision) == int:
         assert model.Revision.decode(

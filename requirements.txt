@@ -1,5 +1,6 @@
-click==7.0
+click==7.1.2
 uvloop==0.14.0
-loguru==0.4.0
-tabulate==0.8.6
-dataclasses==0.6 ; python_version < '3.7'
+loguru==0.5.1
+tabulate==0.8.7
+dataclasses==0.7 ; python_version < '3.7'
+asyncpg==0.20.1
