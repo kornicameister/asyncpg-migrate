@@ -36,7 +36,7 @@ jobs:
   verify:
     working_directory: ~/app
     docker:
-      - image: circleci/python:3.7.4
+      - image: circleci/python:3.8.3
     steps:
       - checkout
       - <<: *install_prepare
@@ -47,7 +47,7 @@ jobs:
           path: typingcov
   test:
     docker:
-      - image: circleci/python:3.7.4
+      - image: circleci/python:3.8.3
       - image: postgres:alpine
         <<: *postgres_env
     working_directory: ~/app
@@ -71,16 +71,18 @@ jobs:
             eval "$(pyenv init -)"
             pyenv install 3.6.8 -s
             pyenv install 3.7.4 -s
+            pyenv install 3.8.3 -s
       - save_cache:
-          key: pyenv-v0-{{ arch }}
+          key: pyenv-v1-{{ arch }}
           paths:
             - ~/.pyenv/versions/3.6.8
             - ~/.pyenv/versions/3.7.4
+            - ~/.pyenv/versions/3.8.3
       - run:
           name: Mighty test run
           command: |
             eval "$(pyenv init -)"
-            pyenv shell 3.6.8 3.7.4
+            pyenv shell 3.6.8 3.7.4 3.8.3
             tox -r
       - store_test_results:
           path: test-reports
@@ -93,7 +95,7 @@ jobs:
           when: on_success
   install:
     docker:
-      - image: circleci/python:3.7.4
+      - image: circleci/python:3.8.3
     working_directory: ~/app
     steps:
       - checkout
@@ -110,7 +112,7 @@ jobs:
 
   deploy:
     docker:
-      - image: circleci/python:3.7.4
+      - image: circleci/python:3.8.3
     working_directory: ~/app
     steps:
       - checkout
