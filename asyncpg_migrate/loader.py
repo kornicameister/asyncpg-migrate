@@ -4,6 +4,7 @@ import importlib.util
 import os
 from pathlib import Path
 import types
+from urllib.parse import quote
 
 from loguru import logger
 
@@ -25,8 +26,8 @@ def load_configuration(filename: Path) -> model.Config:
     )
     parser.read(filename)
 
-    user = parser.get('migrations', 'db_user')
-    password = parser.get('migrations', 'db_password')
+    user = quote(parser.get('migrations', 'db_user'))
+    password = quote(parser.get('migrations', 'db_password'))
     host = parser.get('migrations', 'db_host')
     port = parser.getint('migrations', 'db_port')
     database_name = parser.get('migrations', 'db_name')
