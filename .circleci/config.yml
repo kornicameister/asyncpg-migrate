@@ -5,7 +5,8 @@ x-prepare: &install_prepare
     command: |
       sudo chown -R circleci:circleci /usr/local/bin
       sudo chown -R circleci:circleci /usr/local/lib/python$(python --version | sed -e 's/Python\s//g' | awk -F'.' '{print $1"."$2}')/site-packages
-      pip install pip tox==$(grep tox < test-requirements.txt | awk -F'==' '{print $2}') --upgrade
+      pip install --upgrade pip setuptools wheel
+      pip install tox==$(grep tox < test-requirements.txt | awk -F'==' '{print $2}') --upgrade
 x-test-steps: &test_steps
   working_directory: ~/app
   steps:
