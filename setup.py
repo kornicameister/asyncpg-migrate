@@ -22,7 +22,7 @@ setup(
     ],
     packages=find_packages(include=['asyncpg_migrate', 'asyncpg_migrate.*']),
     extras_require={
-        'uvloop': ['uvloop>=0.12.0'],
+        'uvloop': ['uvloop>=0.13.0'],
     },
     # setupmeta options
     versioning='post',
