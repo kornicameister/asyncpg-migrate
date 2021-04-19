@@ -5,7 +5,8 @@ x-prepare: &install_prepare
     command: |
       sudo chown -R circleci:circleci /usr/local/bin
       sudo chown -R circleci:circleci /usr/local/lib/python$(python --version | sed -e 's/Python\s//g' | awk -F'.' '{print $1"."$2}')/site-packages
-      pip install pip tox==$(grep tox < test-requirements.txt | awk -F'==' '{print $2}') --upgrade
+      pip install --upgrade pip setuptools wheel
+      pip install tox==$(grep tox < test-requirements.txt | awk -F'==' '{print $2}') --upgrade
 x-test-steps: &test_steps
   working_directory: ~/app
   steps:
@@ -36,7 +37,7 @@ jobs:
   verify:
     working_directory: ~/app
     docker:
-      - image: circleci/python:3.7.4
+      - image: circleci/python:3.9.2
     steps:
       - checkout
       - <<: *install_prepare
@@ -47,7 +48,7 @@ jobs:
           path: typingcov
   test:
     docker:
-      - image: circleci/python:3.7.4
+      - image: circleci/python:3.9.2
       - image: postgres:alpine
         <<: *postgres_env
     working_directory: ~/app
@@ -69,18 +70,20 @@ jobs:
           name: Install Pythons
           command: |
             eval "$(pyenv init -)"
-            pyenv install 3.6.8 -s
-            pyenv install 3.7.4 -s
+            pyenv install 3.7.10 -s
+            pyenv install 3.8.8 -s
+            pyenv install 3.9.2 -s
       - save_cache:
           key: pyenv-v0-{{ arch }}
           paths:
-            - ~/.pyenv/versions/3.6.8
-            - ~/.pyenv/versions/3.7.4
+            - ~/.pyenv/versions/3.7.10
+            - ~/.pyenv/versions/3.8.8
+            - ~/.pyenv/versions/3.9.2
       - run:
           name: Mighty test run
           command: |
             eval "$(pyenv init -)"
-            pyenv shell 3.6.8 3.7.4
+            pyenv shell 3.7.10 3.8.8 3.9.2
             tox -r
       - store_test_results:
           path: test-reports
@@ -93,7 +96,7 @@ jobs:
           when: on_success
   install:
     docker:
-      - image: circleci/python:3.7.4
+      - image: circleci/python:3.9.2
     working_directory: ~/app
     steps:
       - checkout
@@ -110,7 +113,7 @@ jobs:
 
   deploy:
     docker:
-      - image: circleci/python:3.7.4
+      - image: circleci/python:3.9.2
     working_directory: ~/app
     steps:
       - checkout
