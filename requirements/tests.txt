@@ -6,7 +6,7 @@ pytest-asyncio==0.15.1
 pytest-click==1.0.2
 pytest-randomly==3.7.0
 
-Requirements-Builder==0.4.2
+Requirements-Builder==0.4.4
 
 # install at the very end to let requirements-builder dictate mock version
 mock
