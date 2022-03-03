@@ -1,4 +1,4 @@
-click==7.1.2
+click==8.0.1
 uvloop==0.14.0
 loguru==0.6.0
 tabulate==0.8.9
