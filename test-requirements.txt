@@ -5,3 +5,4 @@ setupmeta==3.3.0
 -r requirements/mypy.txt
 -r requirements/flake8.txt
 -r requirements/tests.txt
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
